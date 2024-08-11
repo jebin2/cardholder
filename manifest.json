@@ -48,13 +48,13 @@
     ],
     "screenshots": [
       {
-        "src": "/cardholder/images/screenshot.png",
-        "sizes": "1911x942",
+        "src": "/cardholder/images/screenshot-1920x1080.png",
+        "sizes": "1920x1080",
         "type": "image/png",
         "form_factor": "wide"
       },
       {
-        "src": "/cardholder/images/screenshot-.png",
+        "src": "/cardholder/images/screenshot-800x600.png",
         "sizes": "800x600",
         "type": "image/png",
         "form_factor": "wide"

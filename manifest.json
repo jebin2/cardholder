@@ -1,5 +1,5 @@
 {
-    "id": "02121996",
+    "id": "0212199601",
     "name": "Card Holder",
     "description": "Save any cards online",
     "short_name": "My Cards",
@@ -51,13 +51,13 @@
             "src": "/cardholder/images/screenshot-1920x1080.png",
             "sizes": "1920x1080",
             "type": "image/png",
-            "form_factor": "narrow"
+            "form_factor": "wide"
         },
         {
             "src": "/cardholder/images/screenshot-800x600.png",
             "sizes": "800x600",
             "type": "image/png",
-            "form_factor": "wide"
+            "form_factor": "narrow"
         }
     ]
 }

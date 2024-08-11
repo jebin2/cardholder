@@ -283,6 +283,6 @@ form#cardForm button:hover {
 
 @media (min-width: 1025px) {
     .cards-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }

@@ -119,7 +119,7 @@ function addCard() {
 }
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/cardholder/service-worker.js')
             .then((registration) => {
                 const cardsData = [
                     { color: '#4a90e2', code: encryptData('1234 5678 9012 3456', 'jebin'), name: encryptData('John Doe', 'jebin'), cvv: encryptData('123', 'jebin'), expiry: encryptData('12/25', 'jebin'), type: 'Visa', branch: 'HDFC', label: 'Credit' },

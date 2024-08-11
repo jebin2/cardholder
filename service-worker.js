@@ -12,7 +12,9 @@ const urlsToCache = [
     '/cardholder/icon-120.png',
     '/cardholder/icon-96.png',
     '/cardholder/icon-60.png',
-    '/cardholder/icon-48.png'
+    '/cardholder/icon-48.png',
+    '/cardholder/images/screenshot-1920x1080.png',
+    '/cardholder/images/screenshot-800x600.png'
 ];
 
 self.addEventListener('install', event => {

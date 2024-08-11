@@ -137,29 +137,5 @@ if ('serviceWorker' in navigator) {
             .catch((error) => {
                 console.log('Service Worker registration failed:', error);
             });
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-
-            // Optionally, show a custom install button to the user
-            // Example: document.querySelector('#installButton').style.display = 'block';
-
-            // Listen for the custom button click
-            document.querySelector('#installButton').addEventListener('click', () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User accepted the install prompt');
-                        } else {
-                            console.log('User dismissed the install prompt');
-                        }
-                        deferredPrompt = null;
-                    });
-                }
-            });
-        });
     });
 }

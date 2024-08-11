@@ -52,6 +52,12 @@
         "sizes": "1911x942",
         "type": "image/png",
         "form_factor": "wide"
+      },
+      {
+        "src": "/cardholder/images/screenshot-.png",
+        "sizes": "800x600",
+        "type": "image/png",
+        "form_factor": "wide"
       }
     ]
 }

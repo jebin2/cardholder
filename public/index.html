@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cards Holder</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-title">My Cards</div>
+        <div style="letter-spacing: 10px; 
+            padding-right: 2rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  onClick="showPopup()">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+    <div class="content">
+        <div id="cardsContainer" class="cards-grid"></div>
+    </div>
+
+    <div id="popupOverlay" class="popup-overlay hide">
+        <div id="popupContent" class="popup-content">
+            <span id="closePopup" class="close-popup" onClick="closePopupHandler()">&times;</span>
+            <form id="cardForm">
+                <div>
+                    <label for="cardColor">Color:</label>
+                    <input type="color" id="cardColor" name="cardColor" required>
+                </div>
+
+                <label for="cardNumber">Card Number:</label>
+                <input type="text" id="cardNumber" name="cardNumber" required maxlength="19"
+                    placeholder="1234 5678 9012 3456">
+
+                <label for="cardName">Name on Card:</label>
+                <input type="text" id="cardName" name="cardName" required placeholder="John Doe">
+
+                <label for="cardCVV">CVV:</label>
+                <input type="text" id="cardCVV" name="cardCVV" required maxlength="3" placeholder="123">
+
+                <label for="cardExpiry">Expiry Date:</label>
+                <input type="text" id="cardExpiry" name="cardExpiry" required placeholder="MM/YY">
+
+                <label for="cardNetwork">Network:</label>
+                <input type="text" id="cardNetwork" name="cardNetwork" required placeholder="Visa/Rupay/MasterCard">
+
+                <label for="cardBrand">Brand:</label>
+                <input type="text" id="cardBrand" name="cardBrand" required placeholder="HDFC">
+
+                <label for="cardType">Type:</label>
+                <input type="text" id="cardLabel" name="cardLabel" required placeholder="Credit/Debit/prepaid/gift">
+
+                <button type="submit">Add Card</button>
+            </form>
+        </div>
+    </div>
+    <footer class="footer">
+        <p>All card details are stored in an encrypted format to ensure security and privacy.</p>
+    </footer>
+</body>
+
+</html>

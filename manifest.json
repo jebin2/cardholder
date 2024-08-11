@@ -1,5 +1,5 @@
 {
-    "id":"02121996",
+    "id": "02121996",
     "name": "Card Holder",
     "description": "Save any cards online",
     "short_name": "My Cards",
@@ -8,7 +8,7 @@
     "background_color": "#ffffff",
     "theme_color": "#000000",
     "orientation": "portrait",
-    "scope":"/",
+    "scope": "/",
     "icons": [
         {
             "src": "/cardholder/images/icon-512.png",
@@ -47,17 +47,17 @@
         }
     ],
     "screenshots": [
-      {
-        "src": "/cardholder/images/screenshot-1920x1080.png",
-        "sizes": "1920x1080",
-        "type": "image/png",
-        "form_factor": "wide"
-      },
-      {
-        "src": "/cardholder/images/screenshot-800x600.png",
-        "sizes": "800x600",
-        "type": "image/png",
-        "form_factor": "wide"
-      }
+        {
+            "src": "/cardholder/images/screenshot-1920x1080.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/cardholder/images/screenshot-800x600.png",
+            "sizes": "800x600",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
     ]
 }

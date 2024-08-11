@@ -45,5 +45,13 @@
             "sizes": "48x48",
             "type": "image/png"
         }
+    ],
+    "screenshots": [
+      {
+        "src": "/cardholder/images/screenshot.png",
+        "sizes": "1911x943",
+        "type": "image/png",
+        "form_factor": "wide"
+      }
     ]
 }

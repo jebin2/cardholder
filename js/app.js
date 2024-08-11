@@ -129,7 +129,7 @@ if ('serviceWorker' in navigator) {
                     { color: 'black', code: encryptData('5555 6666 7777 8888', 'jebin'), name: encryptData('Alwin Grace', 'jebin'), cvv: encryptData('567', 'jebin'), expiry: encryptData('04/27', 'jebin'), type: 'Rupay', branch: 'DBS', label: 'Debit' }
                 ];
                 renderCards(cardsData);
-                document.getElementById('cardForm').addEventListener('submit', function(event) {
+                document.getElementById('cardForm').addEventListener('submit', function (event) {
                     event.preventDefault(); // Prevent the form from submitting normally
                     closePopupHandler();
                 });
@@ -137,5 +137,29 @@ if ('serviceWorker' in navigator) {
             .catch((error) => {
                 console.log('Service Worker registration failed:', error);
             });
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Optionally, show a custom install button to the user
+            // Example: document.querySelector('#installButton').style.display = 'block';
+
+            // Listen for the custom button click
+            document.querySelector('#installButton').addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            });
+        });
     });
 }

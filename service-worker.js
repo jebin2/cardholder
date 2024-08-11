@@ -1,29 +1,18 @@
 const CACHE_NAME = 'v1';
 const urlsToCache = [
     '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/app.js',
-    '/manifest.json',
-    '/icon-512.png',
-    '/icon-192.png',
-    '/icon-180.png',
-    '/icon-120.png',
-    '/icon-96.png',
-    '/icon-60.png',
-    '/icon-48.png',
     '/cardholder',
-    '/index.html',
-    '/css/styles.css',
-    '/js/app.js',
-    '/manifest.json',
-    '/icon-512.png',
-    '/icon-192.png',
-    '/icon-180.png',
-    '/icon-120.png',
-    '/icon-96.png',
-    '/icon-60.png',
-    '/icon-48.png'
+    '/cardholder/index.html',
+    '/cardholder/css/styles.css',
+    '/cardholder/js/app.js',
+    '/cardholder/manifest.json',
+    '/cardholder/icon-512.png',
+    '/cardholder/icon-192.png',
+    '/cardholder/icon-180.png',
+    '/cardholder/icon-120.png',
+    '/cardholder/icon-96.png',
+    '/cardholder/icon-60.png',
+    '/cardholder/icon-48.png'
 ];
 
 self.addEventListener('install', event => {

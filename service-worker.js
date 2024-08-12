@@ -4,6 +4,7 @@ const urlsToCache = [
     '/cardholder',
     '/cardholder/index.html',
     '/cardholder/css/styles.css',
+    '/cardholder/js/crypto-js.min.js',
     '/cardholder/js/app.js',
     '/cardholder/manifest.json',
     '/cardholder/icon-512.png',

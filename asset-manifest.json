@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.css": "/cardholder/static/css/main.f42de250.css",
+    "main.js": "/cardholder/static/js/main.47ac5816.js",
+    "service-worker.js": "/cardholder/service-worker.js",
+    "index.html": "/cardholder/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.f42de250.css",
+    "static/js/main.47ac5816.js"
+  ]
+}

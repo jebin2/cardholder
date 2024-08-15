@@ -209,11 +209,11 @@ function App() {
                         <div key={index} className="card-container">
                             <div className={`card ${flipIndex.includes(index) ? 'flipped' : ''}`}>
                                 <div className="card-front" style={{ backgroundColor: card.color }}>
-                                    <div className="card-brand">{showDataAtIndex.includes(index) ? decryptData(card.brand) : "Brand"}</div>
-                                    <div className="card-number">{showDataAtIndex.includes(index) ? decryptData(card.code).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : "1111 2222 3333 4444"}</div>
+                                    <div className="card-brand">{showDataAtIndex.includes(index) ? decryptData(card.brand) : "*****"}</div>
+                                    <div className="card-number">{showDataAtIndex.includes(index) ? decryptData(card.code).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : "**** **** **** ****"}</div>
                                     <div class="card-info">
-                                        <div className="card-name">{showDataAtIndex.includes(index) ? decryptData(card.name) : "Name"}</div>
-                                        <div className="card-expiry">{showDataAtIndex.includes(index) ? decryptData(card.expiry) : "00/00"}</div>
+                                        <div className="card-name">{showDataAtIndex.includes(index) ? decryptData(card.name) : "***** ********"}</div>
+                                        <div className="card-expiry">{showDataAtIndex.includes(index) ? decryptData(card.expiry) : "**/**"}</div>
                                     </div>
                                     <CardIcons
                                         showDataAtIndex={showDataAtIndex}
@@ -221,8 +221,8 @@ function App() {
                                         revealData={revealData}
                                         flipCard={flipCard}
                                     />
-                                    <div className="card-type">{showDataAtIndex.includes(index) ? decryptData(card.type) : "Type"}</div>
-                                    <div className="card-label">{showDataAtIndex.includes(index) ? decryptData(card.label) : "Label"}</div>
+                                    <div className="card-type">{showDataAtIndex.includes(index) ? decryptData(card.type) : "**********"}</div>
+                                    <div className="card-label">{showDataAtIndex.includes(index) ? decryptData(card.label) : "******"}</div>
                                 </div>
                                 <div className="card-back">
                                     <div className="card-barcode"></div>
@@ -232,7 +232,7 @@ function App() {
                                         revealData={revealData}
                                         flipCard={flipCard}
                                     />
-                                    <div className="card-cvv">{showDataAtIndex.includes(index) ? `CVV: ${decryptData(card.cvv)}` : "CVV: cvv"}</div>
+                                    <div className="card-cvv">{showDataAtIndex.includes(index) ? `CVV: ${decryptData(card.cvv)}` : "CVV: ***"}</div>
                                 </div>
                             </div>
                         </div>

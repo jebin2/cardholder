@@ -1,34 +1,101 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import CryptoJS from 'crypto-js';
 import {
-    AppBar, Box, Slider, Toolbar, Typography, Button, IconButton,
-    TextField, Dialog, DialogActions, DialogContent, DialogTitle, Popover
+    AppBar, Box, Slider, Toolbar, Typography, Button, IconButton, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Chip
 } from '@mui/material';
 import {
-    Settings as SettingsIcon, FlipCameraAndroid as FlipCameraIcon,
-    Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, AddCard as AddCardIcon,
-    Edit as EditIcon
+    FlipCameraAndroid as FlipCameraIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, AddCard as AddCardIcon, Edit as EditIcon
 } from '@mui/icons-material';
 import './App.css';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
-import { HexColorPicker } from "react-colorful";
+import { processCardData } from './common';
+import Loading from './Loading';
+import CreditCardForm from './CreditCardForm';
+import StateAlert from './StateAlert';
+import ColorPicker from './ColorPicker';
+import SettingsMenu from './SettingsMenu';
 
 function App() {
+    const backgroundColor = "#564bf5";
+    const testCardData = [
+        {
+            "color": "#4a90e2",
+            "code": "U2FsdGVkX1//yOJKIjXDkegmvJ7mfeezI8ikn195FrwYo/m2eH2n0DiqPQJ50W9N",
+            "name": "U2FsdGVkX19KVJSYl8YRyBgxTBEQVhjljBYBsEQ2GH1idhxOeM7AF6Pqqt8XZva9",
+            "cvv": "U2FsdGVkX1/s+fnSTjTpj9eou9ZMyGP/wJASOsqappI=",
+            "expiry": "U2FsdGVkX1+v3sMmi2rqWReNQEwwbCtTK1fdt6SIH6o=",
+            "type": "U2FsdGVkX19ONrMMwcV55u2qJhcft1Qlnm7Hhquif2s=",
+            "brand": "U2FsdGVkX187OV8EVuNPAtZK2Zxq3VasQxYT0KaKqag=",
+            "network_type": "U2FsdGVkX1/BpacFFO4qHTqqwy8/ntOPWDvx9N0nI70="
+        },
+        {
+            "color": "#20354E",
+            "code": "U2FsdGVkX19NMMaCJjK5cK8DCp9bprPSzED+8qmiYboV//3CyGQWMbVj39M+8bZy",
+            "name": "U2FsdGVkX19afcwoYB+01wxIVw7p1fr5JMs2T6bihAg=",
+            "cvv": "U2FsdGVkX1/EQ2trNt+IMh6dPhmz/LphTFI1SsDrtBI=",
+            "expiry": "U2FsdGVkX1+DNzy06th+rcCmyPsD/pXI3IvKFsS5NrE=",
+            "type": "U2FsdGVkX1+n4OXgqjX0RprB4mFDDOKjwStH8FNv71o=",
+            "brand": "U2FsdGVkX18Sk+/HbsAZOmcly/NuqLMx3Ui3mgHa7GA=",
+            "network_type": "U2FsdGVkX1/86+aTHlUXo8Z80YFOgm7ZeX7W4HxZF2E="
+        },
+        {
+            "color": "#e74c3c",
+            "code": "U2FsdGVkX1+AEuMI31ARgqrGlOIJ2Xou7e8bfFMEhjsiblWtvT2KdMvPYaLDI5Pn",
+            "name": "U2FsdGVkX1+oXlNqB8Q1tI2QXsvQhJK+P5ueI9pSUdU=",
+            "cvv": "U2FsdGVkX19fofCbO5ARCXhjb+8uZdADoc26vxctOc0=",
+            "expiry": "U2FsdGVkX1+VyHTXFTRa/F9da4aR+HlOeggxj+Vr+dw=",
+            "type": "U2FsdGVkX18PaboCok13AEOoXJ2KmYK2xk+Hi2co1NE=",
+            "brand": "U2FsdGVkX1/NLdcoBjv6rme11rAiDrb/ETV/UO0s73s=",
+            "network_type": "U2FsdGVkX1+flCkIhbcMiIWChnblwq+R5uhlEZUS/N4="
+        },
+        {
+            "color": "#2ecc71",
+            "code": "U2FsdGVkX18rqu9Z/1hp+KABnNrnt5cSMElmNlmQZsVfRXjM8iqh39fqK7p7kwxp",
+            "name": "U2FsdGVkX185yEIZ7JudFZXwAteLwCsfjSkK4nNVZ7M=",
+            "cvv": "U2FsdGVkX18iV745A0JVCdCY93HGHAFjFfVM/Up0ed4=",
+            "expiry": "U2FsdGVkX18hXh6+yt8IVbJZQVFU6f9U8shdNzWSUzk=",
+            "type": "U2FsdGVkX1+sUkCWgw/0T1atTRvJlbAJtmVPcm2RrZk=",
+            "brand": "U2FsdGVkX1+jCc4ROaA+q5xfWvzju8Wh5dhr9pksAOQ=",
+            "network_type": "U2FsdGVkX1+oALoLdqfiuoWb/90PsocOt4IiBJRmjuQ="
+        },
+        {
+            "color": "mediumpurple",
+            "code": "U2FsdGVkX19SZRSpifn/Rk6XR1wTewMxeqD6H483SRMYZg6bmZkJ9uCL7KmUCj5S",
+            "name": "U2FsdGVkX187LvUrMMhCCcocJDHxEtK54zq+hfq90s8=",
+            "cvv": "U2FsdGVkX1+mwFctZHN70RgT1VJ5MeznDyyhYRJkpeU=",
+            "expiry": "U2FsdGVkX19UhlCIvFYrNFk7Ik2nEH/A+OfzuZCa0mE=",
+            "type": "U2FsdGVkX1+JGL+siDBO6Wcf14n6bMkO3OyESCkAgus=",
+            "brand": "U2FsdGVkX193Hz1h94Njf4yzpNwxgR3RB30fdZeBMWg=",
+            "network_type": "U2FsdGVkX19iPF3CNEgFp/7UpVi1ZBJdSRlEYxUcJcY="
+        },
+        {
+            "color": "black",
+            "code": "U2FsdGVkX1+Di5NWUkVuJXZ9wOZtOTePGtQJGRxsfpcLuNJZ8HEVO0thuzW8RmvH",
+            "name": "U2FsdGVkX191Ba7hMU4v0y3LTWs+qsb70DsqarXRkDY=",
+            "cvv": "U2FsdGVkX1/1s4gu2K4dR7O3RJ8sh4lvXo+1iUbbRG0=",
+            "expiry": "U2FsdGVkX1/wKubYyWmOqhuhHwyuvc139s9h9woU7IQ=",
+            "type": "U2FsdGVkX18IFRN29BYQT2117AL121ojWZhhXPsla+E=",
+            "brand": "U2FsdGVkX1820Q3thHlIm1s5e28VlTOUHoH2x9+Aayg=",
+            "network_type": "U2FsdGVkX1/iWPhWPQ/WUk+D4z7z5ripukUFmVncWp0="
+        }
+    ];
+    const [cardsData, setCardsData] = useState([]);
+
     const [showDataAtIndex, setShowDataAtIndex] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [showKeyPopup, setShowKeyPopup] = useState(false);
     const [flipIndex, setFlipIndex] = useState([]);
     const label = {
         color: "Color", code: "Number", name: "Name", cvv: "CVV", expiry: "Expiry Date",
-        network: "Network", brand: "Brand", label: "Card Label"
+        network: "Network", brand: "Brand", network_type: "Network Type"
     };
     const placeHolder = {
         color: "grey", code: "1111222233334444", name: "xyz", cvv: "123", expiry: "MM/YY",
-        network: "Visa/Rupay", brand: "HDFC/SBI", label: "Credit/Debit/MasteCard"
+        network: "Visa/Rupay", brand: "HDFC/SBI", network_type: "Credit/Debit/MasteCard"
     };
     const [cardDetails, setCardDetails] = useState({
-        color: "", code: "", name: "", cvv: "", expiry: "",
-        network: "", brand: "", label: ""
+        color: "black", code: "", name: "", cvv: "", expiry: "",
+        network: "", brand: "", network_type: ""
     });
     const [viewType, setViewType] = useState("");
     const [currentIndex, setCurrentIndex] = useState();
@@ -36,6 +103,8 @@ function App() {
     const [userKeyDur, setUserKeyDur] = useState(0);
     const [error, setError] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [commonError, setCommonError] = useState("");
+    const [showLoading, setShowLoading] = useState(false);
 
     const encryptData = (data) => CryptoJS.AES.encrypt(data, userKey).toString();
     const decryptData = (encryptedData) => {
@@ -46,75 +115,78 @@ function App() {
         }
     };
 
-    const testCards = [
-        {
-            "color": "#4a90e2",
-            "code": "U2FsdGVkX1//yOJKIjXDkegmvJ7mfeezI8ikn195FrwYo/m2eH2n0DiqPQJ50W9N",
-            "name": "U2FsdGVkX19KVJSYl8YRyBgxTBEQVhjljBYBsEQ2GH1idhxOeM7AF6Pqqt8XZva9",
-            "cvv": "U2FsdGVkX1/s+fnSTjTpj9eou9ZMyGP/wJASOsqappI=",
-            "expiry": "U2FsdGVkX1+v3sMmi2rqWReNQEwwbCtTK1fdt6SIH6o=",
-            "type": "U2FsdGVkX19ONrMMwcV55u2qJhcft1Qlnm7Hhquif2s=",
-            "brand": "U2FsdGVkX187OV8EVuNPAtZK2Zxq3VasQxYT0KaKqag=",
-            "label": "U2FsdGVkX1/BpacFFO4qHTqqwy8/ntOPWDvx9N0nI70="
-        },
-        {
-            "color": "#20354E",
-            "code": "U2FsdGVkX19NMMaCJjK5cK8DCp9bprPSzED+8qmiYboV//3CyGQWMbVj39M+8bZy",
-            "name": "U2FsdGVkX19afcwoYB+01wxIVw7p1fr5JMs2T6bihAg=",
-            "cvv": "U2FsdGVkX1/EQ2trNt+IMh6dPhmz/LphTFI1SsDrtBI=",
-            "expiry": "U2FsdGVkX1+DNzy06th+rcCmyPsD/pXI3IvKFsS5NrE=",
-            "type": "U2FsdGVkX1+n4OXgqjX0RprB4mFDDOKjwStH8FNv71o=",
-            "brand": "U2FsdGVkX18Sk+/HbsAZOmcly/NuqLMx3Ui3mgHa7GA=",
-            "label": "U2FsdGVkX1/86+aTHlUXo8Z80YFOgm7ZeX7W4HxZF2E="
-        },
-        {
-            "color": "#e74c3c",
-            "code": "U2FsdGVkX1+AEuMI31ARgqrGlOIJ2Xou7e8bfFMEhjsiblWtvT2KdMvPYaLDI5Pn",
-            "name": "U2FsdGVkX1+oXlNqB8Q1tI2QXsvQhJK+P5ueI9pSUdU=",
-            "cvv": "U2FsdGVkX19fofCbO5ARCXhjb+8uZdADoc26vxctOc0=",
-            "expiry": "U2FsdGVkX1+VyHTXFTRa/F9da4aR+HlOeggxj+Vr+dw=",
-            "type": "U2FsdGVkX18PaboCok13AEOoXJ2KmYK2xk+Hi2co1NE=",
-            "brand": "U2FsdGVkX1/NLdcoBjv6rme11rAiDrb/ETV/UO0s73s=",
-            "label": "U2FsdGVkX1+flCkIhbcMiIWChnblwq+R5uhlEZUS/N4="
-        },
-        {
-            "color": "#2ecc71",
-            "code": "U2FsdGVkX18rqu9Z/1hp+KABnNrnt5cSMElmNlmQZsVfRXjM8iqh39fqK7p7kwxp",
-            "name": "U2FsdGVkX185yEIZ7JudFZXwAteLwCsfjSkK4nNVZ7M=",
-            "cvv": "U2FsdGVkX18iV745A0JVCdCY93HGHAFjFfVM/Up0ed4=",
-            "expiry": "U2FsdGVkX18hXh6+yt8IVbJZQVFU6f9U8shdNzWSUzk=",
-            "type": "U2FsdGVkX1+sUkCWgw/0T1atTRvJlbAJtmVPcm2RrZk=",
-            "brand": "U2FsdGVkX1+jCc4ROaA+q5xfWvzju8Wh5dhr9pksAOQ=",
-            "label": "U2FsdGVkX1+oALoLdqfiuoWb/90PsocOt4IiBJRmjuQ="
-        },
-        {
-            "color": "mediumpurple",
-            "code": "U2FsdGVkX19SZRSpifn/Rk6XR1wTewMxeqD6H483SRMYZg6bmZkJ9uCL7KmUCj5S",
-            "name": "U2FsdGVkX187LvUrMMhCCcocJDHxEtK54zq+hfq90s8=",
-            "cvv": "U2FsdGVkX1+mwFctZHN70RgT1VJ5MeznDyyhYRJkpeU=",
-            "expiry": "U2FsdGVkX19UhlCIvFYrNFk7Ik2nEH/A+OfzuZCa0mE=",
-            "type": "U2FsdGVkX1+JGL+siDBO6Wcf14n6bMkO3OyESCkAgus=",
-            "brand": "U2FsdGVkX193Hz1h94Njf4yzpNwxgR3RB30fdZeBMWg=",
-            "label": "U2FsdGVkX19iPF3CNEgFp/7UpVi1ZBJdSRlEYxUcJcY="
-        },
-        {
-            "color": "black",
-            "code": "U2FsdGVkX1+Di5NWUkVuJXZ9wOZtOTePGtQJGRxsfpcLuNJZ8HEVO0thuzW8RmvH",
-            "name": "U2FsdGVkX191Ba7hMU4v0y3LTWs+qsb70DsqarXRkDY=",
-            "cvv": "U2FsdGVkX1/1s4gu2K4dR7O3RJ8sh4lvXo+1iUbbRG0=",
-            "expiry": "U2FsdGVkX1/wKubYyWmOqhuhHwyuvc139s9h9woU7IQ=",
-            "type": "U2FsdGVkX18IFRN29BYQT2117AL121ojWZhhXPsla+E=",
-            "brand": "U2FsdGVkX1820Q3thHlIm1s5e28VlTOUHoH2x9+Aayg=",
-            "label": "U2FsdGVkX1/iWPhWPQ/WUk+D4z7z5ripukUFmVncWp0="
-        }
-    ];
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
 
-    const [cardsData, setCardsData] = useState(testCards);
+        if (code) {
+            saveToken(code);
+        } else if (localStorage.getItem("access_token")) {
+            fetchCardData();
+        } else {
+            setCardsData([]);
+            setCommonError("No data available.");
+        }
+    }, []);
+
+    const saveToken = async (code) => {
+        try {
+            setShowLoading(true);
+            const response = await fetch('http://localhost:8888/.netlify/functions/googleAuth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            });
+            const data = await response.json();
+            localStorage.setItem("access_token", data.response.tokens.access_token);
+            localStorage.setItem("refresh_token", data.response.tokens.refresh_token);
+            localStorage.setItem("expiryDate", data.response.tokens.expiry_date);
+        } catch (error) {
+            console.error('Error fetching tokens:', error);
+        } finally {
+            setShowLoading(false);
+            window.location.href = "/";
+        }
+    };
+
+    const fetchCardData = async () => {
+        try {
+            setShowLoading(true);
+            const response = await processCardData("fetch");
+            setCardsData(response);
+            if (response.length === 0) {
+                setCommonError("No data available.");
+            }
+        } catch (error) {
+            setCardsData([]);
+            setCommonError(`Error fetching card data: ${error.message}`);
+        } finally {
+            setShowLoading(false);
+        }
+    };
+
+    const updateCardData = async (content) => {
+        try {
+            setShowLoading(true);
+            const response = await processCardData("update", content);
+            setCardsData(response);
+            if (response.length === 0) {
+                setCommonError("No data available.");
+            }
+        } catch (error) {
+            setCardsData([]);
+            setCommonError(`Error updating card data: ${error.message}`);
+        } finally {
+            setShowLoading(false);
+        }
+    };
 
     const flipCard = (index) => setFlipIndex(flipIndex.includes(index) ? flipIndex.filter(i => i !== index) : [...flipIndex, index]);
 
     const toggleDataVisibility = (index) => {
-        setShowDataAtIndex(showDataAtIndex.includes(index) ? showDataAtIndex.filter(i => i !== index) : [...showDataAtIndex, index])
+        setShowDataAtIndex(showDataAtIndex.includes(index) ? showDataAtIndex.filter(i => i !== index) : [...showDataAtIndex, index]);
     };
 
     const UrgeWithPleasureComponent = useCallback(({ duration }) => (
@@ -136,32 +208,26 @@ function App() {
     ), [userKey]);
 
     const handleAddCard = () => {
-        setCardsData([...cardsData, newCard]);
+        setCardsData([...cardsData, {}]);
         setShowPopup(false);
     };
 
     const handleClose = () => {
         setUserKeyDur(10);
         setShowPopup(false);
-    }
-    let marks = [];
-    const marksGen = () => {
-        for (var i = 10; i <= 100; i += 10) {
-            marks.push({
-                value: i,
-                label: i + "s"
-            })
-        }
     };
-    marksGen();
+
+    const marks = React.useMemo(() => {
+        return Array.from({ length: 10 }, (_, i) => ({
+            value: (i + 1) * 10,
+            label: `${(i + 1) * 10}s`,
+        }));
+    }, []);
 
     const revealData = (action, index) => {
-        if (action) {
-            setViewType(action);
-        }
-        if (index !== undefined) {
-            setCurrentIndex(index);
-        }
+        if (action) setViewType(action);
+        if (index !== undefined) setCurrentIndex(index);
+
         if (userKey) {
             if (action === 'edit') {
                 const card = cardsData[index];
@@ -173,7 +239,7 @@ function App() {
                     expiry: decryptData(card.expiry),
                     network: decryptData(card.network),
                     brand: decryptData(card.brand),
-                    label: decryptData(card.label)
+                    network_type: decryptData(card.network_type)
                 });
                 setShowPopup(true);
             } else {
@@ -188,56 +254,98 @@ function App() {
         }
     };
 
-    const handleInputChange = (event) => setCardDetails({ ...cardDetails, [event.target.name]: event.target.value });
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setCardDetails((prevDetails) => ({
+            ...prevDetails,
+            [name]: value,
+        }));
+    };
+
+    const [alertState, setAlertState] = useState(false);
+    const [alertType, setAlertType] = useState("success");
+    const [alertMessage, setAlertMessage] = useState("none");
+
+    const invokeAlert = (state, type, message) => {
+        setAlertState(state);
+        setAlertType(type);
+        setAlertMessage(message);
+    };
 
     return (
         <>
             <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static">
+                <AppBar position="static" sx={{ backgroundColor: backgroundColor, borderBottom: "6px solid black" }}>
                     <Toolbar>
                         <Typography variant="h6" sx={{ flexGrow: 1 }}>My Cards</Typography>
-                        {userKeyDur > 0 && userKey ? <UrgeWithPleasureComponent duration={userKeyDur} /> : ''}
-                        <IconButton sx={{ color: "white", marginLeft: "1rem" }} onClick={() => setShowPopup(true)}><AddCardIcon /></IconButton>
-                        <IconButton sx={{ color: "white", marginLeft: "1rem" }}><SettingsIcon /></IconButton>
+                        {userKeyDur > 0 && userKey && <UrgeWithPleasureComponent duration={userKeyDur} />}
+                        <IconButton sx={{
+                            color: "white", marginLeft: "1rem", '&:hover': {
+                                backgroundColor: "black"
+                            }
+                        }} onClick={() => setShowPopup(true)}><AddCardIcon /></IconButton>
+                        <SettingsMenu invokeAlert={invokeAlert} setShowLoading={setShowLoading} setCardsData={setCardsData} setCommonError={setCommonError} />
                     </Toolbar>
                 </AppBar>
             </Box>
 
             <div className="content">
-                <div className="cards-grid">
-                    {cardsData.map((card, index) => (
-                        <div key={index} className="card-container">
-                            <div className={`card ${flipIndex.includes(index) ? 'flipped' : ''}`}>
-                                <div className="card-front" style={{ backgroundColor: card.color }}>
-                                    <div className="card-brand">{showDataAtIndex.includes(index) ? decryptData(card.brand) : "*****"}</div>
-                                    <div className="card-number">{showDataAtIndex.includes(index) ? decryptData(card.code).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : "**** **** **** ****"}</div>
-                                    <div class="card-info">
-                                        <div className="card-name">{showDataAtIndex.includes(index) ? decryptData(card.name) : "***** ********"}</div>
-                                        <div className="card-expiry">{showDataAtIndex.includes(index) ? decryptData(card.expiry) : "**/**"}</div>
+                {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex" }}>
+                    {commonError === "No data available." ?
+                        <Chip label="Add Card" variant="outlined" onClick={() => setShowPopup(true)} icon={<AddCardIcon fontSize='large' />} size='medium' sx={{
+                            padding: "16px 12px",
+                            fontSize: "1.5rem",
+                            border: "4px solid black",  // Burnt orange border for a retro feel
+                            // backgroundColor: "#4A5D23",  // Muted olive green background color
+                            color: "black",  // Burnt orange text color to match the border
+                            borderRadius: "8px",  // Rounded corners
+                            boxShadow: `4px 4px 0px ${backgroundColor}`,  // Warm brown shadow for depth
+                            transition: "box-shadow 0.3s ease, transform 0.3s ease",  // Smooth transition for hover effects
+                            '&:hover': {
+                                boxShadow: `8px 8px 0px ${backgroundColor}`,  // Stronger burnt orange shadow on hover
+                                transform: "translate(-4px, -4px)",  // Move the chip slightly up and left on hover
+                                backgroundColor: "#3C4B1E",  // Slightly darker olive green on hover
+                                cursor: "pointer",  // Pointer cursor on hover
+                            },
+                        }} /> :
+                        commonError
+                    }
+                </Typography> :
+                    <div className="cards-grid">
+                        {cardsData.map((card, index) => (
+                            <div key={index} className="card-container">
+                                <div className={`card ${flipIndex.includes(index) ? 'flipped' : ''}`}>
+                                    <div className="card-front" style={{ backgroundColor: card.color }}>
+                                        <div className="card-brand">{showDataAtIndex.includes(index) ? decryptData(card.brand) : "*****"}</div>
+                                        <div className="card-number">{showDataAtIndex.includes(index) ? decryptData(card.code).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : "**** **** **** ****"}</div>
+                                        <div className="card-info">
+                                            <div className="card-name">{showDataAtIndex.includes(index) ? decryptData(card.name) : "***** ********"}</div>
+                                            <div className="card-expiry">{showDataAtIndex.includes(index) ? decryptData(card.expiry) : "**/**"}</div>
+                                        </div>
+                                        <CardIcons
+                                            showDataAtIndex={showDataAtIndex}
+                                            index={index}
+                                            revealData={revealData}
+                                            flipCard={flipCard}
+                                        />
+                                        <div className="card-type">{showDataAtIndex.includes(index) ? decryptData(card.type) : "**********"}</div>
+                                        <div className="card-label">{showDataAtIndex.includes(index) ? decryptData(card.network_type) : "******"}</div>
                                     </div>
-                                    <CardIcons
-                                        showDataAtIndex={showDataAtIndex}
-                                        index={index}
-                                        revealData={revealData}
-                                        flipCard={flipCard}
-                                    />
-                                    <div className="card-type">{showDataAtIndex.includes(index) ? decryptData(card.type) : "**********"}</div>
-                                    <div className="card-label">{showDataAtIndex.includes(index) ? decryptData(card.label) : "******"}</div>
-                                </div>
-                                <div className="card-back">
-                                    <div className="card-barcode"></div>
-                                    <CardIcons
-                                        showDataAtIndex={showDataAtIndex}
-                                        index={index}
-                                        revealData={revealData}
-                                        flipCard={flipCard}
-                                    />
-                                    <div className="card-cvv">{showDataAtIndex.includes(index) ? `CVV: ${decryptData(card.cvv)}` : "CVV: ***"}</div>
+                                    <div className="card-back">
+                                        <div className="card-barcode"></div>
+                                        <CardIcons
+                                            showDataAtIndex={showDataAtIndex}
+                                            index={index}
+                                            revealData={revealData}
+                                            flipCard={flipCard}
+                                        />
+                                        <div className="card-cvv">{showDataAtIndex.includes(index) ? `CVV: ${decryptData(card.cvv)}` : "CVV: ***"}</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                }
             </div>
 
             <Dialog
@@ -298,86 +406,37 @@ function App() {
                         console.log(email);
                         handleClose();
                     },
+                    sx: {
+                        borderRadius: '12px', // Rounded corners for a retro touch
+                        boxShadow: `8px 8px 0px ${backgroundColor}`, // Warm burnt orange shadow
+                        border: "6px solid black",
+                        '& .MuiDialogTitle-root': {
+                            fontWeight: '800', // Bold title text
+                        },
+                        '& .MuiDialogContent-root': {
+                            padding: '16px', // Padding for dialog content
+                        },
+                        '& .MuiButton-root': {
+                            fontWeight: '800', // Bold title text
+                            color: 'black', // Button text color
+                            borderColor: 'black', // Button border color
+                            '&:hover': {
+                                fontWeight: '800', // Bold title text
+                                color: 'white', // Button text color
+                                backgroundColor: 'black', // Darker olive green for hover
+                            },
+                        },
+                    },
                 }}
             >
-                <DialogTitle>{cardDetails.code ? "Add Card" : "Edit Card"}</DialogTitle>
+                <DialogTitle>
+                    <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: "800" }}>
+                        <span>{cardDetails.code ? "Add Card" : "Edit Card"}</span>
+                        <ColorPicker color={cardDetails.color} setColor={handleInputChange} />
+                    </span>
+                </DialogTitle>
                 <DialogContent>
-                    {Object.keys(label).map((name, i) => (
-                        ["color"].includes(name) ?
-                            <div style={{
-                                display: "flex"
-                            }}>
-                                <TextField
-                                    InputProps={{
-                                        readOnly: true,
-                                    }}
-                                    key={i}
-                                    autoFocus
-                                    required
-                                    margin="dense"
-                                    name={name}
-                                    label={label[name]}
-                                    placeholder={placeHolder[name]}
-                                    type="text"
-                                    sx={{
-                                        width: "40%"
-                                    }}
-                                    variant="standard"
-                                    value={cardDetails[name]}
-                                />
-                                <BasicPopover setColor={(color) => setCardDetails({ ...cardDetails, color: color })} />
-                            </div>
-                            :
-                            <TextField
-                                key={i}
-                                autoFocus
-                                required
-                                margin="dense"
-                                name={name}
-                                label={label[name]}
-                                placeholder={placeHolder[name]}
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={cardDetails[name]}
-                                onChange={(e) => {
-                                    if (e.target.value.length > 16) {
-                                        return;
-                                    }
-                                    if (
-                                        ["code", "cvv"].includes(name) && isNaN(e.target.value) ||
-                                        "code" === name && e.target.value.length > 16 ||
-                                        "cvv" === name && e.target.value.length > 3) {
-                                        return;
-                                    }
-                                    if (name === "expiry") {
-                                        if ((e.target.value.length === 1 || e.target.value.length === 2) && (isNaN(e.target.value.length) || Number(e.target.value) > 31)) {
-                                            return;
-                                        }
-                                        if (e.target.value.length === 3 && !e.target.value.endsWith("/")) {
-                                            return;
-                                        }
-                                        if (e.target.value.length > 3 && e.target.value.endsWith("/")) {
-                                            return;
-                                        }
-                                        if ((e.target.value.length === 4 || e.target.value.length === 5)) {
-                                            let mmayy = e.target.value.split("/");
-                                            if (
-                                                isNaN(mmayy[0]) ||
-                                                isNaN(mmayy[1]) ||
-                                                Number(mmayy[1]) > 12
-                                            ) {
-                                                return;
-                                            }
-                                        }
-                                        if (e.target.value.length > 5) {
-                                            return;
-                                        }
-                                    }
-                                    handleInputChange(e);
-                                }}
-                            />
-                    ))}
+                    <CreditCardForm handleInputChange={handleInputChange} label={label} placeHolder={placeHolder} cardDetails={cardDetails} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
@@ -387,26 +446,30 @@ function App() {
                             name: encryptData(cardDetails.name),
                             cvv: encryptData(cardDetails.cvv),
                             expiry: encryptData(cardDetails.expiry),
-                            brand: encryptData(cardDetails.brand),
-                            name: encryptData(cardDetails.name),
-                            type: encryptData(cardDetails.type)
+                            brand: cardDetails.brand ? encryptData(cardDetails.brand) : cardDetails.brand,
+                            network: cardDetails.network ? encryptData(cardDetails.network) : cardDetails.network,
+                            network_type: cardDetails.network_type ? encryptData(cardDetails.network_type) : cardDetails.network_type,
+                            color: cardDetails.color
                         }
                         let index = currentIndex;
+                        let finalData;
                         if (viewType !== "edit") {
-                            setCardsData([...cardsData, ...newData]);
+                            finalData = [...cardsData, newData];
+                            setCardsData(finalData);
                         } else {
-                            const updatedCardsData = [...cardsData];
-                            updatedCardsData[index] = { ...updatedCardsData[index], ...newData };
-                            setCardsData(updatedCardsData);
+                            finalData = [...cardsData];
+                            finalData[index] = { ...finalData[index], ...newData };
+                            setCardsData(finalData);
                         }
-                        handleClose();
+                        updateCardData(finalData);
                     }}>{viewType === "edit" ? "Save" : "Add"}</Button>
                 </DialogActions>
             </Dialog>
-
+            <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
             <footer className="footer">
                 <p>All card details are stored in an encrypted format.</p>
             </footer>
+            <Loading show={showLoading} />
         </>
     );
 }
@@ -429,43 +492,6 @@ function CardIcons({ showDataAtIndex, index, revealData, flipCard }) {
             </IconButton>
         </>
     )
-}
-
-function BasicPopover({ setColor }) {
-    const [anchorEl, setAnchorEl] = React.useState(null);
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
-
-    return (
-        <div>
-            <Button aria-describedby={id} variant="contained" onClick={handleClick}>
-                Set Color
-            </Button>
-            <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-            >
-                <Typography sx={{ p: 2 }}>
-                    <HexColorPicker onChange={setColor} />
-                </Typography>
-            </Popover>
-        </div>
-    );
 }
 
 export default App;

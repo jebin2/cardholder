@@ -17,6 +17,7 @@ import AddCardDialog from './AddCardDialog';
 
 function App() {
     const backgroundColor = "#564bf5";
+    const netlifyUrl = window.location.host === "localhost" ? "http://localhost:8888" : "https://jeapis.netlify.app/";
     const [cardsData, setCardsData] = useState([]);
     const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
     const [visibleCardIndices, setVisibleCardIndices] = useState([]);
@@ -52,7 +53,7 @@ function App() {
                 content = [];
             }
             setIsLoading(true);
-            const response = await fetch('http://localhost:8888/.netlify/functions/googleAuth', {
+            const response = await fetch(netlifyUrl + '/.netlify/functions/googleAuth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

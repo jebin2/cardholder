@@ -3,11 +3,10 @@ import React from 'react';
 import { processCardData } from './common';
 
 export default function Sync({ onSyncComplete, setIsLoading }) {
-    // Set up Google login with redirect mode
     const googleLogin = useGoogleLogin({
         flow: 'auth-code',
-        ux_mode: 'redirect',  // Use redirect mode
-        redirect_uri: 'http://localhost:3000/cardholder',  // Your redirect URIredirect_uri: 'http://localhost:3000/cardholder',  // Your redirect URI
+        ux_mode: 'redirect',
+        redirect_uri: window.location.href,
         scope: 'https://www.googleapis.com/auth/drive.appdata',  // Add required scopes
     });
 

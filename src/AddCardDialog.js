@@ -90,7 +90,10 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                 <CreditCardForm handleInputChange={handleInputChange} label={label} placeHolder={placeHolder} cardDetails={cardDetails} />
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => setIsAddCardDialogOpen(false)}>Cancel</Button>
+                <Button onClick={() => {
+                    setKeyDuration(30);
+                    setIsAddCardDialogOpen(false)}
+                }>Close</Button>
                 <Button onClick={() => {
                     let newData = {
                         code: encryptData(cardDetails.code, encryptionKey, CryptoJS),

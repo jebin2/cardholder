@@ -109,22 +109,22 @@ function App() {
 
     const openAddCardDialog = () => {
         setViewMode("create");
-        setIsKeyDialogOpen(true);
+        handleCardAction("create", -1);
     };
 
     const handleCardAction = (type, index) => {
         setViewMode(type);
         setSelectedCardIndex(index);
-        switch(type) {
+        switch (type) {
             case "show":
-                if(encryptionKey) {
+                if (encryptionKey) {
                     toggleCardVisibility(index);
                 } else {
                     setIsKeyDialogOpen(true);
                 }
                 break;
             default:
-                if(encryptionKey) {
+                if (encryptionKey) {
                     setKeyDuration(0);
                     setVisibleCardIndices([]);
                     setIsAddCardDialogOpen(true);
@@ -228,10 +228,10 @@ function App() {
                 }
             </div>
 
-            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} backgroundColor={backgroundColor} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} /> }
-            
-            {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} /> }
-            
+            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} backgroundColor={backgroundColor} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
+
+            {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
+
             <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
             <footer className="footer">
                 <p>All card details are stored in an encrypted format.</p>
@@ -241,7 +241,7 @@ function App() {
     );
 }
 
-function CardIcons({ visibleCardIndices, index, toggleCardFlip, handleCardAction}) {
+function CardIcons({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) {
     return (
         <>
             <IconButton className="edit-icon" onClick={() => {

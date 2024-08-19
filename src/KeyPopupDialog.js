@@ -22,6 +22,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
             open={isKeyDialogOpen}
             PaperProps={{
                 sx: {
+                    width: "340px",
                     borderRadius: '12px',
                     boxShadow: `8px 8px 0px ${backgroundColor}`,
                     border: "6px solid black",
@@ -78,8 +79,11 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                         />
                     </Box>
                 )}
-                <Typography variant="caption" sx={{ display: 'block', mt: 2, color: 'text.secondary', fontWeight: "800", width: 300}}>
-                    Keep this key secure--it's essential for encrypting/decrypting the data.
+                <Typography variant="caption" sx={{
+                    display: 'block', mt: 2, color: 'text.secondary', fontWeight: "800", width: 300,
+                    textAlign: "center",
+                }}>
+                    Keep this key secure. It's essential for encrypting/decrypting the data.
                 </Typography>
             </DialogContent>
             <DialogActions>
@@ -102,7 +106,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     }
                     setError(false);
                     setErrorMsg("");
-                    if(viewMode === "show") {
+                    if (viewMode === "show") {
                         setKeyDuration(keyTTL);
                     }
                     setEncryptionKey(key)

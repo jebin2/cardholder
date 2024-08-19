@@ -69,7 +69,7 @@ function App() {
             console.error('Error fetching tokens:', error);
         } finally {
             setIsLoading(false);
-            window.location.href = "/";
+            window.location.href = "/cardholder";
         }
     };
 

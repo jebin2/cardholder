@@ -8,7 +8,6 @@ import { styled } from '@mui/system';
 export default function CreditCardForm({ handleInputChange, label, placeHolder, cardDetails }) {
     const CardContainer = styled(Paper)(({ theme, bgcolor }) => ({
         padding: theme.spacing(2),
-        borderRadius: 6,
         maxWidth: 360,
         margin: 'auto',
         backgroundColor: bgcolor,

@@ -82,7 +82,7 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
         >
             <DialogTitle>
                 <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: "800" }}>
-                    <span>{cardDetails.code ? "Add Card" : "Edit Card"}</span>
+                    <span>{viewMode === "create" ? "Add Card" : "Edit Card"}</span>
                     <ColorPicker color={cardDetails.color} setColor={handleInputChange} />
                 </span>
             </DialogTitle>

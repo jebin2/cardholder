@@ -95,7 +95,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                         setErrorMsg('Minimum 10 characters required')
                         return;
                     }
-                    if (viewMode !== "create" && decryptData(cardData.code, key, CryptoJS).length !== 19) {
+                    if (cardData.code && decryptData(cardData.code, key, CryptoJS).length !== 19) {
                         setError(true);
                         setErrorMsg('Invalid Key')
                         return;

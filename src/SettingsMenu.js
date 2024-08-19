@@ -50,7 +50,7 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, 
                     <MenuItem onClick={deleteDataFromGoogleDrive}>
                         Delete Data From Google Drive
                     </MenuItem> : <MenuItem onClick={handleClose}>
-                        <GoogleOAuthProvider clientId='386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com'>
+                        <GoogleOAuthProvider clientId='386326794734-7vscbpqmdplr1grnt7ddva2c62597nut.apps.googleusercontent.com'>
                             <Sync setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
                         </GoogleOAuthProvider>
                     </MenuItem>}

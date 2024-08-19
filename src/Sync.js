@@ -2,7 +2,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import React from 'react';
 import { processCardData } from './common';
 
-export default function Sync({ onSyncComplete, setShowLoading }) {
+export default function Sync({ onSyncComplete, setIsLoading }) {
     // Set up Google login with redirect mode
     const googleLogin = useGoogleLogin({
         flow: 'auth-code',
@@ -14,7 +14,7 @@ export default function Sync({ onSyncComplete, setShowLoading }) {
     return (
         <div>
             <div onClick={() => {
-                setShowLoading(true);
+                setIsLoading(true);
                 if (localStorage.getItem("access_token")) {
                     processCardData("fetch")
                         .then((response) => {
@@ -22,15 +22,15 @@ export default function Sync({ onSyncComplete, setShowLoading }) {
                             if (response.length !== localData.length) {
                                 processCardData("update", localData)
                                     .then((response) => {
-                                        setShowLoading(false);
+                                        setIsLoading(false);
                                         onSyncComplete(true, "success", "Sync Competed");
                                     })
                                     .catch((error) => {
-                                        setShowLoading(false);
+                                        setIsLoading(false);
                                         onSyncComplete(true, "error", "Issue with Sync try again later.");
                                     });
                             } else {
-                                setShowLoading(false);
+                                setIsLoading(false);
                                 onSyncComplete(true, "success", "Sync Competed");
                             }
                         })

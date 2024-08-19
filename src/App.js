@@ -45,18 +45,25 @@ function App() {
 
     const saveToken = async (code) => {
         try {
+            let content = localStorage.getItem("card_data");
+            if(content) {
+                content = JSON.parse(content);
+            } else {
+                content = [];
+            }
             setIsLoading(true);
             const response = await fetch('http://localhost:8888/.netlify/functions/googleAuth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ code: code })
+                body: JSON.stringify({ code: code, content: content })
             });
             const data = await response.json();
-            localStorage.setItem("access_token", data.response.tokens.access_token);
-            localStorage.setItem("refresh_token", data.response.tokens.refresh_token);
-            localStorage.setItem("expiryDate", data.response.tokens.expiry_date);
+            localStorage.setItem("access_token", data.response.access_token);
+            localStorage.setItem("refresh_token", data.response.refresh_token);
+            localStorage.setItem("card_data", data.response.content);
+            localStorage.setItem("googleDriveSyncEnabled", "true");
         } catch (error) {
             console.error('Error fetching tokens:', error);
         } finally {

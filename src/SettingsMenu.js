@@ -8,7 +8,7 @@ import Sync from "./Sync";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { processCardData } from './common';
 
-export default function SettingsMenu({ invokeAlert, setShowLoading, setCardsData, setCommonError }) {
+export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, setErrorMessage }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -17,21 +17,16 @@ export default function SettingsMenu({ invokeAlert, setShowLoading, setCardsData
     const handleClose = () => {
         setAnchorEl(null);
     };
-    const [showDeleteOption, setShowDeleteOption] = useState(!!localStorage.getItem("access_token"));
+    const [showDeleteOption, setShowDeleteOption] = useState(localStorage.getItem("googleDriveSyncEnabled") === "true");
     const deleteDataFromGoogleDrive = async () => {
         try {
-            setShowLoading(true);
-            const response = await processCardData("delete");
-            setCardsData(response);
-            if (response.length === 0) {
-                setShowDeleteOption(false);
-                setCommonError("No data available.");
-            }
+            setIsLoading(true);
+            await processCardData("delete");
+            setShowDeleteOption(false);
         } catch (error) {
-            setCardsData([]);
-            setCommonError(`Error fetching card data: ${error.message}`);
+            setErrorMessage(`Error fetching card data: ${error.message}`);
         } finally {
-            setShowLoading(false);
+            setIsLoading(false);
         }
     }
     return (
@@ -51,15 +46,14 @@ export default function SettingsMenu({ invokeAlert, setShowLoading, setCardsData
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={handleClose}>
-                    <GoogleOAuthProvider clientId='386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com'>
-                        <Sync setShowLoading={setShowLoading} onSyncComplete={invokeAlert} />
-                    </GoogleOAuthProvider>
-                </MenuItem>
                 {showDeleteOption ?
                     <MenuItem onClick={deleteDataFromGoogleDrive}>
                         Delete Data From Google Drive
-                    </MenuItem> : <></>}
+                    </MenuItem> : <MenuItem onClick={handleClose}>
+                        <GoogleOAuthProvider clientId='386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com'>
+                            <Sync setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
+                        </GoogleOAuthProvider>
+                    </MenuItem>}
             </Menu>
         </div>
     );

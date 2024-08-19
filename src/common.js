@@ -1,6 +1,6 @@
 const processCardData = async (type, content) => {
     try {
-        if(localStorage.hasOwnProperty("googleDriveSyncEnabled")) {
+        if(localStorage.getItem("googleDriveSyncEnabled") === "true") {
             const response = await fetch('http://localhost:8888/.netlify/functions/getCardHolderData', {
                 method: 'POST',
                 headers: {
@@ -26,7 +26,7 @@ const processCardData = async (type, content) => {
                 if(type === "delete") {
                     localStorage.removeItem("access_token");
                     localStorage.removeItem("refresh_token");
-                    localStorage.removeItem("card_data");
+                    localStorage.removeItem("googleDriveSyncEnabled");
                 } else {
                     localStorage.setItem("access_token", data.access_token);
                     localStorage.setItem("refresh_token", data.refresh_token);

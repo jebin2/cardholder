@@ -17,7 +17,7 @@ import AddCardDialog from './AddCardDialog';
 
 function App() {
     const backgroundColor = "#564bf5";
-    const netlifyUrl = window.location.host === "localhost" ? "http://localhost:8888" : "https://jeapis.netlify.app/";
+    const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
     const [cardsData, setCardsData] = useState([]);
     const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
     const [visibleCardIndices, setVisibleCardIndices] = useState([]);

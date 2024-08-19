@@ -1,6 +1,6 @@
 const processCardData = async (type, content) => {
     try {
-        const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app/";
+        const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
         if(localStorage.getItem("googleDriveSyncEnabled") === "true") {
             const response = await fetch(netlifyUrl + '/.netlify/functions/getCardHolderData', {
                 method: 'POST',

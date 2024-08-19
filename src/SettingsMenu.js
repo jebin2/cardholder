@@ -9,6 +9,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { processCardData } from './common';
 
 export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, setErrorMessage }) {
+    const clientId = window.location.host.includes("localhost") ? "386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com" : "386326794734-7vscbpqmdplr1grnt7ddva2c62597nut.apps.googleusercontent.com";
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -50,7 +51,7 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, 
                     <MenuItem onClick={deleteDataFromGoogleDrive}>
                         Delete Data From Google Drive
                     </MenuItem> : <MenuItem onClick={handleClose}>
-                        <GoogleOAuthProvider clientId='386326794734-7vscbpqmdplr1grnt7ddva2c62597nut.apps.googleusercontent.com'>
+                        <GoogleOAuthProvider clientId={clientId}>
                             <Sync setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
                         </GoogleOAuthProvider>
                     </MenuItem>}

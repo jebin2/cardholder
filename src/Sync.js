@@ -6,7 +6,7 @@ export default function Sync({ onSyncComplete, setIsLoading }) {
     const googleLogin = useGoogleLogin({
         flow: 'auth-code',
         ux_mode: 'redirect',
-        redirect_uri: window.location.href,
+        redirect_uri: window.location.href.endsWith("/") ? window.location.href.substring(0, window.location.href.length - 1) : window.location.href,
         scope: 'https://www.googleapis.com/auth/drive.appdata',  // Add required scopes
     });
 

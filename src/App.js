@@ -290,7 +290,7 @@ function App() {
                     }}
                 />
             </div>}
-            <div className="content">
+            <div className="content" style={cardsData.length === 0 ? {paddingTop: "5rem"} : {}}>
                 {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
                     {commonError === "No data available." ?
                         <Chip label="Add Card" variant="outlined" onClick={() => openAddCardDialog(true)} icon={<AddCardIcon fontSize='large' />} size='medium' sx={{

@@ -45,10 +45,12 @@
     transition: transform 0.6s;
     transform-style: preserve-3d;
 }
+
 .card-info {
     position: absolute;
     bottom: 40px;
 }
+
 .card.flipped {
     transform: rotateY(180deg);
 }
@@ -243,36 +245,21 @@
     stroke-width: 3;
 }
 
-/* Media Queries */
-@media (max-width: 767px) {
-    .cards-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-    .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 1025px) {
-    .cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
 .react-colorful {
     height: 140px;
-  }
-  .react-colorful__saturation {
+}
+
+.react-colorful__saturation {
     border-radius: 4px 4px 0 0;
-  }
-  .react-colorful__hue {
+}
+
+.react-colorful__hue {
     height: 40px;
     border-radius: 0 0 4px 4px;
-  }
-  .react-colorful__hue-pointer {
+}
+
+.react-colorful__hue-pointer {
     width: 12px;
     height: 100px;
     border-radius: 0;
-  }
+}

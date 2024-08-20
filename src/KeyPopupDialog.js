@@ -80,8 +80,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     </Box>
                 )}
                 <Typography variant="caption" sx={{
-                    display: 'block', mt: 2, color: 'text.secondary', fontWeight: "800", width: 300,
-                    textAlign: "center",
+                    display: 'block', mt: 2, color: 'text.secondary', fontWeight: "800", textAlign: "center"
                 }}>
                     Keep this key secure. It's essential for encrypting/decrypting the data.
                 </Typography>

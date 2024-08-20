@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    Box, Typography, TextField, Paper, Grid, Divider
+    Box, Typography, TextField, Paper, Grid, Divider, Chip
 } from '@mui/material';
 import './App.css';
 import { styled } from '@mui/system';
@@ -18,7 +18,7 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
 
     const Label = styled(Typography)(({ theme }) => ({
         marginBottom: theme.spacing(0.5),
-        fontWeight: 500,
+        fontWeight: 700,
         fontSize: '0.9rem', // Smaller font size
     }));
 
@@ -153,19 +153,34 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
                 </Box>
             </CardContainer>
             <Box sx={{ marginTop: "40px", maxWidth: 360, margin: 'auto' }}>
-                <Divider sx={{ bgcolor: 'rgba(0, 0, 0, 0.12)', marginBottom: "15px" }} />
+                <Divider
+                    sx={{
+                        marginTop: "15px",
+                        marginBottom: "15px",
+                        fontWeight: "700",
+                        "& .MuiDivider-wrapper": {
+                          fontWeight: "700"
+                        },
+                        "&::before, &::after": {
+                          borderTopWidth: "2px",
+                          borderTopColor: "black"
+                        }
+                      }}
+                >
+                    <Chip label="Optional" size="medium" />
+                </Divider>
                 <Box component="form" noValidate autoComplete="off">
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                            <Label>{label["brand"]}(Optional)</Label>
+                            <Label>{label["brand"]}</Label>
                             {renderTextField("brand", 12)}
                         </Grid>
                         <Grid item xs={6}>
-                            <Label>{label["network"]}(Optional)</Label>
+                            <Label>{label["network"]}</Label>
                             {renderTextField("network", 12)}
                         </Grid>
                         <Grid item xs={6}>
-                            <Label>{label["network_type"]}(Optional)</Label>
+                            <Label>{label["network_type"]}</Label>
                             {renderTextField("network_type", 12)}
                         </Grid>
                     </Grid>

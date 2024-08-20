@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "cd2367e3f0dcbe2a156fca1a565536fb",
+    "revision": "ba049cfaed2f5b499a800ce180ae8e2d",
     "url": "/cardholder/index.html"
   },
   {
-    "revision": "1858edcd81d12673a3ce",
+    "revision": "abb4abee648a8e0fa3a8",
     "url": "/cardholder/static/css/main.27ec2f0b.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/cardholder/static/js/2.3ed57638.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "1858edcd81d12673a3ce",
-    "url": "/cardholder/static/js/main.a77a3595.chunk.js"
+    "revision": "abb4abee648a8e0fa3a8",
+    "url": "/cardholder/static/js/main.4eb9e748.chunk.js"
   },
   {
     "revision": "8e26e99c280b13a49c71",

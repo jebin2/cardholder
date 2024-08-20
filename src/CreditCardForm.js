@@ -3,9 +3,9 @@ import {
     Box, Typography, TextField, Paper, Grid, Divider, Chip
 } from '@mui/material';
 import './App.css';
-import { styled } from '@mui/system';
+import { color, fontSize, styled } from '@mui/system';
 
-export default function CreditCardForm({ handleInputChange, label, placeHolder, cardDetails }) {
+export default function CreditCardForm({ handleInputChange, label, placeHolder, cardDetails, errors }) {
     const CardContainer = styled(Paper)(({ theme, bgcolor }) => ({
         padding: theme.spacing(2),
         maxWidth: 360,
@@ -48,6 +48,10 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             '&.Mui-focused': {
                 color: 'white', // White label color when focused
             },
+        },
+        '& .MuiFormHelperText-root': {
+            color: "#dc5757",
+            fontSize: "0.8rem",
         },
     }));
     const handleChange = (e) => {
@@ -106,6 +110,8 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             }}
             onChange={handleChange}
             onFocus={() => handleFocus(name)}
+            errors={errors[name] !== ""}
+            helperText={errors[name]}
         />
     );
     const renderTextField = (name, maxLength = null) => (

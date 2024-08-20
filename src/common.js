@@ -61,7 +61,13 @@ const processCardData = async (type, content) => {
     }
 };
 const encryptData = (data, encryptionKey, CryptoJS) => CryptoJS.AES.encrypt(data, encryptionKey).toString();
-const decryptData = (encryptedData, encryptionKey, CryptoJS) => CryptoJS.AES.decrypt(encryptedData, encryptionKey).toString(CryptoJS.enc.Utf8);
+const decryptData = (encryptedData, encryptionKey, CryptoJS) => {
+    try {
+        return CryptoJS.AES.decrypt(encryptedData, encryptionKey).toString(CryptoJS.enc.Utf8);
+    } catch(e) {
+        return "";
+    }
+};
 module.exports = {
     processCardData,
     encryptData,

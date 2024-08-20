@@ -25,6 +25,9 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
         network: "Visa/Rupay", brand: "HDFC/SBI", network_type: "Credit/Debit/MasteCard"
     };
 
+    const [errors, setErrors] = useState({
+        code: "", name: "", cvv: "", expiry: ""
+    })
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setCardDetails((prevDetails) => ({
@@ -87,7 +90,7 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                 </span>
             </DialogTitle>
             <DialogContent>
-                <CreditCardForm handleInputChange={handleInputChange} label={label} placeHolder={placeHolder} cardDetails={cardDetails} />
+                <CreditCardForm handleInputChange={handleInputChange} label={label} placeHolder={placeHolder} cardDetails={cardDetails} errors={errors} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => {
@@ -95,6 +98,33 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                     setIsAddCardDialogOpen(false)}
                 }>Close</Button>
                 <Button onClick={() => {
+                    let fieldError = {
+                        code: "", name: "", cvv: "", expiry: ""
+                    }
+                    if(cardDetails.code.length < 19) {
+                        fieldError = {...fieldError, code: "Not valid"};
+                    } else {
+                        fieldError = {...fieldError, code: ""};
+                    }
+                    if(cardDetails.expiry.length < 5) {
+                        fieldError = {...fieldError, expiry: "Not valid"};
+                    } else {
+                        fieldError = {...fieldError, expiry: ""};
+                    }
+                    if(cardDetails.cvv.length < 3) {
+                        fieldError = {...fieldError, cvv: "Not valid"};
+                    } else {
+                        fieldError = {...fieldError, cvv: ""};
+                    }
+                    if(cardDetails.name.length === 0) {
+                        fieldError = {...fieldError, name: "Not valid"};
+                    } else {
+                        fieldError = {...fieldError, name: ""};
+                    }
+                    setErrors(fieldError);
+                    if(Object.keys(fieldError).filter(key => fieldError[key] !== "")[0]) {
+                        return false;
+                    }
                     let newData = {
                         code: encryptData(cardDetails.code, encryptionKey, CryptoJS),
                         name: encryptData(cardDetails.name, encryptionKey, CryptoJS),

@@ -14,6 +14,7 @@ import StateAlert from './StateAlert';
 import SettingsMenu from './SettingsMenu';
 import KeyPopupDialog from './KeyPopupDialog';
 import AddCardDialog from './AddCardDialog';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function App() {
     const backgroundColor = "#564bf5";
@@ -47,7 +48,7 @@ function App() {
     const saveToken = async (code) => {
         try {
             let content = localStorage.getItem("card_data");
-            if(content) {
+            if (content) {
                 content = JSON.parse(content);
             } else {
                 content = [];
@@ -135,7 +136,13 @@ function App() {
                 if (encryptionKey) {
                     setKeyDuration(0);
                     setVisibleCardIndices([]);
-                    setIsAddCardDialogOpen(true);
+                    switch(type) {
+                        case "delete":
+                            deleteCard(index);
+                            break;
+                        default:
+                            setIsAddCardDialogOpen(true);
+                    }
                 } else {
                     setIsKeyDialogOpen(true);
                 }
@@ -157,13 +164,26 @@ function App() {
             case "edit":
                 setIsAddCardDialogOpen(true);
                 break;
+            case "delete":
+                deleteCard(selectedCardIndex);
+                break;
         }
+    }
+
+    const deleteCard = (index) => {
+        setCardsData((prevData) => {
+            let data = prevData.filter((val, id) => id !== index);
+            localStorage.setItem("card_data", JSON.stringify(data));
+            setEncryptionKey("");
+            return data;
+        });
     }
 
     return (
         <>
+            {/* header */}
             <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static" sx={{ backgroundColor: backgroundColor, borderBottom: "6px solid black" }}>
+                <AppBar position="fixed" sx={{ backgroundColor: backgroundColor, borderBottom: "6px solid black" }}>
                     <Toolbar>
                         <Typography variant="h6" sx={{ flexGrow: 1 }}>My Cards</Typography>
                         {keyDuration > 0 && encryptionKey && <KeyTimer duration={keyDuration} />}
@@ -178,7 +198,7 @@ function App() {
             </Box>
 
             <div className="content">
-                {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex" }}>
+                {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
                     {commonError === "No data available." ?
                         <Chip label="Add Card" variant="outlined" onClick={() => openAddCardDialog(true)} icon={<AddCardIcon fontSize='large' />} size='medium' sx={{
                             padding: "16px 12px",
@@ -241,9 +261,19 @@ function App() {
             {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
 
             <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
-            <footer className="footer">
-                <p>All card details are stored in an encrypted format.</p>
-            </footer>
+
+            <AppBar position="fixed" sx={{
+                backgroundColor: "#333",
+                color: "white",
+                textAlign: "center",
+                padding: "10px",
+                top: 'auto',
+                bottom: "0"
+            }}>
+                <Toolbar>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>All card details are stored in an encrypted format.</Typography>
+                </Toolbar>
+            </AppBar>
             <Loading show={isLoading} />
         </>
     );
@@ -252,6 +282,11 @@ function App() {
 function CardIcons({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) {
     return (
         <>
+            <IconButton className="delete-icon" onClick={() => {
+                handleCardAction("delete", index);
+            }}>
+                <DeleteIcon />
+            </IconButton>
             <IconButton className="edit-icon" onClick={() => {
                 handleCardAction("edit", index);
             }}>

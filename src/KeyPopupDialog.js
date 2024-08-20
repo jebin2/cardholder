@@ -63,6 +63,43 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     }}
                     error={error}
                     helperText={errorMsg}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: 'black',
+                                borderWidth: '2px',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: 'black',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: 'black !important',
+                                borderWidth: '2px',
+                            },
+                        },
+                        '& .MuiInputBase-input': {
+                            color: 'black',
+                            fontSize: '0.9rem',
+                            borderBottom: "2px solid black"
+                        },
+                        '& .MuiInput-root.Mui-focused::after': {
+                            borderBottom: "2px solid black"
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                            color: 'black',
+                            opacity: 1,
+                        },
+                        '& .MuiFormLabel-root': {
+                            color: 'black',
+                            '&.Mui-focused': {
+                                color: 'black'
+                            },
+                        },
+                        // Override the default focus shadow
+                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            boxShadow: 'none',
+                        },
+                    }}
                 />
                 {viewMode === "show" && (
                     <Box sx={{ width: 300, marginTop: 2 }}>
@@ -112,7 +149,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     callback();
                     setIsKeyDialogOpen(false);
                 }}>
-                    {viewMode === "create" ? "Add" : viewMode === "edit" ? "Edit" : "Show"}
+                    {viewMode === "create" ? "Add" : viewMode === "edit" ? "Edit" : viewMode === "delete" ? "Delete" : "Show"}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -87,7 +87,7 @@ function App() {
             finalContent = [];
             setErrorMessage(`Error fetching card data: ${error.message}`);
         } finally {
-            setCardsData(finalContent)
+            setCardsData(finalContent);
             setIsLoading(false);
         }
     };
@@ -170,13 +170,23 @@ function App() {
         }
     }
 
-    const deleteCard = (index) => {
-        setCardsData((prevData) => {
-            let data = prevData.filter((val, id) => id !== index);
-            localStorage.setItem("card_data", JSON.stringify(data));
-            setEncryptionKey("");
-            return data;
-        });
+    const deleteCard = async (index) => {
+        let finalContent = cardsData.filter((val, id) => id !== index);
+        try {
+            setIsLoading(true);
+            const response = await processCardData("update", finalContent);
+            finalContent = response;
+            if (response.length === 0) {
+                setErrorMessage("No data available.");
+            }
+        } catch (error) {
+            finalContent = [];
+            setErrorMessage(`Error fetching card data: ${error.message}`);
+        } finally {
+            setCardsData(finalContent);
+            setKeyDuration(30);
+            setIsLoading(false);
+        }
     }
 
     return (

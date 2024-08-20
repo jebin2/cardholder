@@ -102,7 +102,6 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             placeholder={placeHolder[name]}
             value={cardDetails[name]}
             fullWidth
-            type="number"
             variant="outlined"
             inputProps={{
                 maxLength: maxLength,

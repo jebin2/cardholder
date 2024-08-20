@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
-    AppBar, Box, Toolbar, Typography, IconButton, Chip
+    AppBar, Box, Toolbar, Typography, IconButton, Chip, Input, InputAdornment, Tooltip
 } from '@mui/material';
 import {
-    FlipCameraAndroid as FlipCameraIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, AddCard as AddCardIcon, Edit as EditIcon
+    FlipCameraAndroid as FlipCameraIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, AddCard as AddCardIcon, Edit as EditIcon, Search
 } from '@mui/icons-material';
 import './App.css';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
@@ -30,7 +30,7 @@ function App() {
     const [keyDuration, setKeyDuration] = useState(0);
     const [commonError, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-
+    const [searchTerm, setSearchTerm] = useState();
     const [alertState, setAlertState] = useState(false);
     const [alertType, setAlertType] = useState("success");
     const [alertMessage, setAlertMessage] = useState("none");
@@ -134,15 +134,7 @@ function App() {
                 break;
             default:
                 if (encryptionKey) {
-                    setKeyDuration(0);
-                    setVisibleCardIndices([]);
-                    switch(type) {
-                        case "delete":
-                            deleteCard(index);
-                            break;
-                        default:
-                            setIsAddCardDialogOpen(true);
-                    }
+                    keySuccessCallback(type, index);
                 } else {
                     setIsKeyDialogOpen(true);
                 }
@@ -155,18 +147,33 @@ function App() {
         setAlertMessage(message);
     };
 
-    const keySuccessCallback = () => {
-        switch (viewMode) {
+    const keySuccessCallback = (type, index) => {
+        switch (type) {
             case "show":
-                toggleCardVisibility(selectedCardIndex);
+                toggleCardVisibility(index);
                 break;
             case "create":
             case "edit":
+                setKeyDuration(0);
+                setVisibleCardIndices([]);
                 setIsAddCardDialogOpen(true);
                 break;
             case "delete":
-                deleteCard(selectedCardIndex);
+                setKeyDuration(0);
+                setVisibleCardIndices([]);
+                deleteCard(index);
                 break;
+            case "showAll":
+                setKeyDuration(0);
+                setVisibleCardIndices(Object.keys(cardsData).map(x => parseInt(x)));
+                break;
+            case "hideAll":
+                setKeyDuration(0);
+                setEncryptionKey("");
+                setVisibleCardIndices([]);
+                break;
+            default:
+                setIsAddCardDialogOpen(true);
         }
     }
 
@@ -189,14 +196,48 @@ function App() {
         }
     }
 
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredCardsData = cardsData.filter(card => {
+        if (encryptionKey) {
+            return !!Object.keys(card).filter(key => decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery))[0];
+        } else {
+            return true;
+        }
+    });
+
     return (
         <>
-            {/* header */}
             <Box sx={{ flexGrow: 1 }}>
                 <AppBar position="fixed" sx={{ backgroundColor: backgroundColor, borderBottom: "6px solid black" }}>
                     <Toolbar>
                         <Typography variant="h6" sx={{ flexGrow: 1 }}>My Cards</Typography>
                         {keyDuration > 0 && encryptionKey && <KeyTimer duration={keyDuration} />}
+                        {cardsData.length !== 0 ? encryptionKey && keyDuration === 0 ?
+                            <IconButton
+                                sx={{
+                                    color: "white", marginLeft: "1rem", '&:hover': {
+                                        backgroundColor: "black"
+                                    }
+                                }}
+                                onClick={() => handleCardAction("hideAll")}
+                            >
+                                <VisibilityIcon />
+                            </IconButton> :
+                            <IconButton
+                                sx={{
+                                    color: "white",
+                                    marginLeft: "1rem",
+                                    '&:hover': {
+                                        backgroundColor: "black"
+                                    }
+                                }}
+                                onClick={() => handleCardAction("showAll")}
+                            >
+                                <VisibilityOffIcon />
+                            </IconButton>
+                            : <></>
+                        }
                         <IconButton sx={{
                             color: "white", marginLeft: "1rem", '&:hover': {
                                 backgroundColor: "black"
@@ -206,7 +247,49 @@ function App() {
                     </Toolbar>
                 </AppBar>
             </Box>
-
+            {cardsData.length !== 0 && <div className="search-bar">
+                <Input
+                    placeholder="Search by Name, Brand, network or network type"
+                    startAdornment={
+                        <>
+                            <InputAdornment position="start" sx={{
+                                marginLeft: "10px"
+                            }}>
+                                <Search />
+                            </InputAdornment>
+                        </>
+                    }
+                    value={searchTerm}
+                    onChange={(e) => {
+                        if (!encryptionKey) {
+                            invokeAlert(true, "warning", "Click on the eye icon to decrypt and perform search");
+                        }
+                        setSearchQuery(e.target.value)
+                    }
+                    }
+                    className="search-input"
+                    disableUnderline
+                    sx={{
+                        fontWeight: "800",
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        padding: '8px 12px',
+                        width: '80%',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                        border: "6px solid black",
+                        transition: 'box-shadow 0.3s ease',
+                        '& .MuiInputAdornment-root': {
+                            color: 'black'
+                        },
+                        '&:hover, &:focus, &:focus-within, &:active': {
+                            boxShadow: `12px 12px 0px #564bf5`,
+                        },
+                        '& .MuiInputAdornment-root': {
+                            color: 'black',
+                        },
+                    }}
+                />
+            </div>}
             <div className="content">
                 {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
                     {commonError === "No data available." ?
@@ -230,7 +313,7 @@ function App() {
                     }
                 </Typography> :
                     <div className="cards-grid">
-                        {cardsData.map((card, index) => (
+                        {filteredCardsData.map((card, index) => (
                             <div key={index} className="card-container">
                                 <div className={`card ${flippedCardIndices.includes(index) ? 'flipped' : ''}`}>
                                     <div className="card-front" style={{ backgroundColor: card.color }}>
@@ -266,7 +349,7 @@ function App() {
                 }
             </div>
 
-            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} backgroundColor={backgroundColor} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
+            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} backgroundColor={backgroundColor} selectedCardIndex={selectedCardIndex} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
 
             {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
 

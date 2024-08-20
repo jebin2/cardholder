@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, B
 import CryptoJS from 'crypto-js';
 import { decryptData } from './common';
 
-const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, viewMode, cardData, callback, setKeyDuration, setEncryptionKey }) => {
+const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, viewMode, selectedCardIndex, cardData, callback, setKeyDuration, setEncryptionKey }) => {
 
     const [key, setKey] = useState("");
     const [keyTTL, setKeyTTL] = useState(30);
@@ -146,7 +146,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                         setKeyDuration(keyTTL);
                     }
                     setEncryptionKey(key)
-                    callback();
+                    callback(viewMode, selectedCardIndex);
                     setIsKeyDialogOpen(false);
                 }}>
                     {viewMode === "create" ? "Add" : viewMode === "edit" ? "Edit" : viewMode === "delete" ? "Delete" : "Show"}

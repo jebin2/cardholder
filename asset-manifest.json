@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/cardholder/static/css/main.4792450a.chunk.css",
-    "main.js": "/cardholder/static/js/main.9d37bb5a.chunk.js",
+    "main.css": "/cardholder/static/css/main.018d5c80.chunk.css",
+    "main.js": "/cardholder/static/js/main.7c50b81f.chunk.js",
     "runtime-main.js": "/cardholder/static/js/runtime-main.5be9f528.js",
-    "static/js/2.018a4627.chunk.js": "/cardholder/static/js/2.018a4627.chunk.js",
+    "static/js/2.f75f46c6.chunk.js": "/cardholder/static/js/2.f75f46c6.chunk.js",
     "index.html": "/cardholder/index.html",
-    "precache-manifest.cd0269cf684fb58619ee1bbded6f4055.js": "/cardholder/precache-manifest.cd0269cf684fb58619ee1bbded6f4055.js",
+    "precache-manifest.81eecd91ba549652702b31e4b93ee46f.js": "/cardholder/precache-manifest.81eecd91ba549652702b31e4b93ee46f.js",
     "service-worker.js": "/cardholder/service-worker.js",
-    "static/js/2.018a4627.chunk.js.LICENSE.txt": "/cardholder/static/js/2.018a4627.chunk.js.LICENSE.txt"
+    "static/js/2.f75f46c6.chunk.js.LICENSE.txt": "/cardholder/static/js/2.f75f46c6.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.5be9f528.js",
-    "static/js/2.018a4627.chunk.js",
-    "static/css/main.4792450a.chunk.css",
-    "static/js/main.9d37bb5a.chunk.js"
+    "static/js/2.f75f46c6.chunk.js",
+    "static/css/main.018d5c80.chunk.css",
+    "static/js/main.7c50b81f.chunk.js"
   ]
 }

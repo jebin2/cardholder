@@ -41,25 +41,27 @@ const processCardData = async (type, content) => {
             // If there's no content, resolve with an empty array
             return Promise.resolve([]);
         } else {
-            switch(type) {
-                case "fetch":
-                    let newContent = [];
-                    if(localStorage.hasOwnProperty("card_data")) {
-                        newContent = JSON.parse(localStorage.getItem("card_data"));
-                    }
-                    localStorage.setItem("card_data", JSON.stringify(newContent));
-                    break;
-                case "update":
-                    localStorage.setItem("card_data", JSON.stringify(content));
-                    break;
-            }
-            return Promise.resolve(JSON.parse(localStorage.getItem("card_data")));
+            return offlineData(type, content);
         }
     } catch (e) {
-        // Reject the promise with the caught error
-        return Promise.reject(new Error("Error in updating card data: " + e.message));
+        return offlineData(type, content);
     }
 };
+const offlineData = (type, content) => {
+    switch(type) {
+        case "fetch":
+            let newContent = [];
+            if(localStorage.hasOwnProperty("card_data")) {
+                newContent = JSON.parse(localStorage.getItem("card_data"));
+            }
+            localStorage.setItem("card_data", JSON.stringify(newContent));
+            break;
+        case "update":
+            localStorage.setItem("card_data", JSON.stringify(content));
+            break;
+    }
+    return Promise.resolve(JSON.parse(localStorage.getItem("card_data")));
+}
 const encryptData = (data, encryptionKey, CryptoJS) => CryptoJS.AES.encrypt(data, encryptionKey).toString();
 const decryptData = (encryptedData, encryptionKey, CryptoJS) => {
     try {

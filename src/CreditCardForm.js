@@ -56,13 +56,10 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
 
         switch (name) {
             case 'code':
-                newValue = value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+                newValue = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
                 break;
             case 'expiry':
-                newValue = value.replace(/\D/g, '').replace(/(\d{2})(?=\d)/, '$1/').substr(0, 5);
-                break;
-            case 'cvv':
-                newValue = value.replace(/\D/g, '').substr(0, 3);
+                newValue = value.replace(/(\d{2})(?=\d)/, '$1/');
                 break;
             default:
                 break;
@@ -95,7 +92,7 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             inputRefs[activeField].current.focus();
         }
     }, [activeField, cardDetails]);
-    const renderContainerTextField = (name, maxLength = null) => (
+    const renderContainerTextField = (name, maxLength = null, type = "text") => (
         <CustomTextField
             inputRef={inputRefs[name]}
             name={name}
@@ -105,7 +102,7 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             variant="outlined"
             inputProps={{
                 maxLength: maxLength,
-                inputMode: 'numeric'
+                inputMode: type
             }}
             onChange={handleChange}
             onFocus={() => handleFocus(name)}
@@ -138,15 +135,15 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Label>{label["code"]}</Label>
-                            {renderContainerTextField("code", 19)}
+                            {renderContainerTextField("code", 19, "numeric")}
                         </Grid>
                         <Grid item xs={6}>
                             <Label>{label["expiry"]}</Label>
-                            {renderContainerTextField("expiry", 5)}
+                            {renderContainerTextField("expiry", 5, "numeric")}
                         </Grid>
                         <Grid item xs={6}>
                             <Label>{label["cvv"]}</Label>
-                            {renderContainerTextField("cvv", 3)}
+                            {renderContainerTextField("cvv", 3, "numeric")}
                         </Grid>
                         <Grid item xs={12}>
                             <Label>{label["name"]}</Label>

@@ -105,7 +105,8 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             type="number"
             variant="outlined"
             inputProps={{
-                maxLength: maxLength
+                maxLength: maxLength,
+                inputMode: 'numeric'
             }}
             onChange={handleChange}
             onFocus={() => handleFocus(name)}

@@ -200,7 +200,7 @@ function App() {
 
     const filteredCardsData = cardsData.filter(card => {
         if (encryptionKey) {
-            return !!Object.keys(card).filter(key => decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery))[0];
+            return !!Object.keys(card).filter(key => key !== "color" && decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase()))[0];
         } else {
             return true;
         }

@@ -16,17 +16,6 @@ module.exports = {
 		  },
 		},
 	  },
-	  {
-		urlPattern: ({ url }) => url.pathname.includes('functions/getCardHolderData'),
-		handler: 'NetworkOnly',
-		options: {
-		  plugins: [
-			new workbox.backgroundSync.BackgroundSyncPlugin('sync-queue', {
-			  maxRetentionTime: 24 * 60 // Retry for a max of 24 hours
-			})
-		  ]
-		},
-	  },
 	],
 	// Optional: Other configuration options for Workbox
   };

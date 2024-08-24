@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "/cardholder/static/css/main.346dca33.chunk.css",
-    "main.js": "/cardholder/static/js/main.61f401e4.chunk.js",
+    "main.js": "/cardholder/static/js/main.d2286dbc.chunk.js",
     "runtime-main.js": "/cardholder/static/js/runtime-main.5be9f528.js",
     "static/js/2.98090cbc.chunk.js": "/cardholder/static/js/2.98090cbc.chunk.js",
     "index.html": "/cardholder/index.html",
-    "precache-manifest.19b4f0ab16c4b6ec444f709ff3d527fe.js": "/cardholder/precache-manifest.19b4f0ab16c4b6ec444f709ff3d527fe.js",
+    "precache-manifest.97b7f1a1f7b0cd708a01c91375b8eb0a.js": "/cardholder/precache-manifest.97b7f1a1f7b0cd708a01c91375b8eb0a.js",
     "service-worker.js": "/cardholder/service-worker.js",
     "static/js/2.98090cbc.chunk.js.LICENSE.txt": "/cardholder/static/js/2.98090cbc.chunk.js.LICENSE.txt"
   },
@@ -13,6 +13,6 @@
     "static/js/runtime-main.5be9f528.js",
     "static/js/2.98090cbc.chunk.js",
     "static/css/main.346dca33.chunk.css",
-    "static/js/main.61f401e4.chunk.js"
+    "static/js/main.d2286dbc.chunk.js"
   ]
 }

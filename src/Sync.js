@@ -10,6 +10,21 @@ export default function Sync({ onSyncComplete, setIsLoading }) {
         scope: 'https://www.googleapis.com/auth/drive.appdata',  // Add required scopes
     });
 
+    
+
+    const fetchCardData = async () => {
+        let finalContent = [];
+        try {
+            setIsLoading(true);
+            const response = await processCardData("fetch");
+            finalContent = response;
+        } catch (error) {
+            finalContent = [];
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div>
             <div onClick={() => {
@@ -17,9 +32,9 @@ export default function Sync({ onSyncComplete, setIsLoading }) {
                 if (localStorage.getItem("access_token")) {
                     processCardData("fetch")
                         .then((response) => {
-                            let localData = JSON.parse(localStorage.getItem("card_data"));
+                            let localData = fetchCardData();
                             if (response.length !== localData.length) {
-                                processCardData("update", localData)
+                                processCardData("upsert", localData)
                                     .then((response) => {
                                         setIsLoading(false);
                                         onSyncComplete(true, "success", "Sync Competed");

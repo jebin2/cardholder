@@ -36,11 +36,11 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
         }));
     };
 
-    const updateCardData = async (content) => {
-        let finalContent = content;
+    const upsertCardData = async (cardObj) => {
+        let finalContent;
         try {
             setIsLoading(true);
-            const response = await processCardData("update", content);
+            const response = await processCardData("upsert", cardObj);
             finalContent = response;
             if (response.length === 0) {
                 setErrorMessage("No data available.");
@@ -125,7 +125,8 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                     if(Object.keys(fieldError).filter(key => fieldError[key] !== "")[0]) {
                         return false;
                     }
-                    let newData = {
+                    let cardObj = {
+                        key: new Date().getTime(),
                         code: encryptData(cardDetails.code, encryptionKey, CryptoJS),
                         name: encryptData(cardDetails.name, encryptionKey, CryptoJS),
                         cvv: encryptData(cardDetails.cvv, encryptionKey, CryptoJS),
@@ -135,14 +136,10 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                         network_type: encryptData(cardDetails.network_type, encryptionKey, CryptoJS),
                         color: cardDetails.color
                     }
-                    let finalData;
-                    if (viewMode === "create") {
-                        finalData = [...cardsData, newData];
-                    } else {
-                        finalData = [...cardsData];
-                        finalData[selectedCardIndex] = { ...finalData[selectedCardIndex], ...newData };
+                    if (viewMode === "edit") {
+                        cardObj = {...cardObj, key: cardsData[selectedCardIndex].key}
                     }
-                    updateCardData(finalData);
+                    upsertCardData(cardObj);
                 }}>{viewMode === "edit" ? "Save" : "Add"}</Button>
             </DialogActions>
         </Dialog>

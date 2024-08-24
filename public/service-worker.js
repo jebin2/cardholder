@@ -69,4 +69,19 @@ self.addEventListener('message', (event) => {
   }
 });
 
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-to-drive') {
+    event.waitUntil(syncToDrive());
+  }
+});
+
+async function syncToDrive() {
+  const cardData = "sdfsdf";
+}
+
+// Set up periodic sync
+setInterval(() => {
+  self.registration.sync.register('sync-to-drive');
+}, 1000);
+
 // Any other custom service worker logic can go here.

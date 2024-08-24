@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     AppBar, Box, Toolbar, Typography, IconButton, Chip, Input, InputAdornment, Tooltip
 } from '@mui/material';
@@ -15,10 +15,13 @@ import SettingsMenu from './SettingsMenu';
 import KeyPopupDialog from './KeyPopupDialog';
 import AddCardDialog from './AddCardDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloudOffIcon from '@mui/icons-material/CloudOff';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+
+const backgroundColor = "#564bf5";
+const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
 
 function App() {
-    const backgroundColor = "#564bf5";
-    const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
     const [cardsData, setCardsData] = useState([]);
     const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
     const [visibleCardIndices, setVisibleCardIndices] = useState([]);
@@ -30,24 +33,14 @@ function App() {
     const [keyDuration, setKeyDuration] = useState(0);
     const [commonError, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState();
+    const [searchQuery, setSearchQuery] = useState('');
     const [alertState, setAlertState] = useState(false);
     const [alertType, setAlertType] = useState("success");
     const [alertMessage, setAlertMessage] = useState("none");
 
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        if (code) {
-            saveToken(code);
-        } else {
-            fetchCardData();
-        }
-    }, []);
-
     const saveToken = async (code) => {
         try {
-            let content = localStorage.getItem("card_data");
+            let content = fetchCardData();
             if (content) {
                 content = JSON.parse(content);
             } else {
@@ -64,7 +57,7 @@ function App() {
             const data = await response.json();
             localStorage.setItem("access_token", data.response.access_token);
             localStorage.setItem("refresh_token", data.response.refresh_token);
-            localStorage.setItem("card_data", data.response.content);
+            // To-Do: need to do upsert
             localStorage.setItem("googleDriveSyncEnabled", "true");
         } catch (error) {
             console.error('Error fetching tokens:', error);
@@ -83,6 +76,7 @@ function App() {
             if (response.length === 0) {
                 setErrorMessage("No data available.");
             }
+            // serviceWorkerRegistration.sync.register('sync-to-drive');
         } catch (error) {
             finalContent = [];
             setErrorMessage(`Error fetching card data: ${error.message}`);
@@ -92,11 +86,27 @@ function App() {
         }
     };
 
-    const toggleCardFlip = (index) => setFlippedCardIndices(flippedCardIndices.includes(index) ? flippedCardIndices.filter(i => i !== index) : [...flippedCardIndices, index]);
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            saveToken(code);
+        } else {
+            fetchCardData();
+        }
+    }, []);
 
-    const toggleCardVisibility = (index) => {
-        setVisibleCardIndices(visibleCardIndices.includes(index) ? visibleCardIndices.filter(i => i !== index) : [...visibleCardIndices, index]);
-    };
+    const toggleCardFlip = useCallback((index) => {
+        setFlippedCardIndices(prev => 
+            prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+        );
+    }, []);
+
+    const toggleCardVisibility = useCallback((index) => {
+        setVisibleCardIndices(prev => 
+            prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+        );
+    }, []);
 
     const KeyTimer = useCallback(({ duration }) => (
         <CountdownCircleTimer
@@ -121,33 +131,42 @@ function App() {
         handleCardAction("create", -1);
     };
 
-    const handleCardAction = (type, index) => {
+    const handleCardAction = useCallback((type, index) => {
         setViewMode(type);
         setSelectedCardIndex(index);
-        switch (type) {
-            case "show":
-                if (encryptionKey) {
-                    toggleCardVisibility(index);
-                } else {
-                    setIsKeyDialogOpen(true);
-                }
-                break;
-            default:
                 if (encryptionKey) {
                     keySuccessCallback(type, index);
                 } else {
                     setIsKeyDialogOpen(true);
                 }
-        }
-    };
+    }, [encryptionKey]);
 
-    const invokeAlert = (state, type, message) => {
+    const invokeAlert = useCallback((state, type, message) => {
         setAlertState(state);
         setAlertType(type);
         setAlertMessage(message);
-    };
+    }, []);
 
-    const keySuccessCallback = (type, index) => {
+    const deleteCard = async (index) => {
+        let finalContent;
+        try {
+            setIsLoading(true);
+            const response = await processCardData("delete", cardsData[index]);
+            finalContent = response;
+            if (response.length === 0) {
+                setErrorMessage("No data available.");
+            }
+        } catch (error) {
+            finalContent = [];
+            setErrorMessage(`Error fetching card data: ${error.message}`);
+        } finally {
+            setCardsData(finalContent);
+            setKeyDuration(30);
+            setIsLoading(false);
+        }
+    }
+
+    const keySuccessCallback = useCallback((type, index) => {
         switch (type) {
             case "show":
                 toggleCardVisibility(index);
@@ -175,36 +194,36 @@ function App() {
             default:
                 setIsAddCardDialogOpen(true);
         }
-    }
+    }, [cardsData, toggleCardVisibility, deleteCard]);
 
-    const deleteCard = async (index) => {
-        let finalContent = cardsData.filter((val, id) => id !== index);
-        try {
-            setIsLoading(true);
-            const response = await processCardData("update", finalContent);
-            finalContent = response;
-            if (response.length === 0) {
-                setErrorMessage("No data available.");
-            }
-        } catch (error) {
-            finalContent = [];
-            setErrorMessage(`Error fetching card data: ${error.message}`);
-        } finally {
-            setCardsData(finalContent);
-            setKeyDuration(30);
-            setIsLoading(false);
-        }
-    }
+    const filteredCardsData = useMemo(() => {
+        return cardsData.filter(card => {
+            if (!encryptionKey) return true;
+            return Object.keys(card).some(key => 
+                !["color", "key"].includes(key) && decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        });
+    }, [cardsData, encryptionKey, searchQuery]);
 
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const filteredCardsData = cardsData.filter(card => {
-        if (encryptionKey) {
-            return !!Object.keys(card).filter(key => key !== "color" && decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase()))[0];
-        } else {
-            return true;
-        }
-    });
+    const CardIcons = useCallback(({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) => (
+        <>
+            <IconButton className="delete-icon" onClick={() => handleCardAction("delete", index)}>
+                <DeleteIcon />
+            </IconButton>
+            <IconButton className="edit-icon" onClick={() => handleCardAction("edit", index)}>
+                <EditIcon />
+            </IconButton>
+            <IconButton className='ai-icon' onClick={() => handleCardAction("show", index)}>
+                {visibleCardIndices.includes(index) ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
+            <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
+                <FlipCameraIcon fontSize="large" />
+            </IconButton>
+            <IconButton>
+                <CloudOffIcon />
+            </IconButton>
+        </>
+    ), []);
 
     return (
         <>
@@ -259,7 +278,7 @@ function App() {
                             </InputAdornment>
                         </>
                     }
-                    value={searchTerm}
+                    value={searchQuery}
                     onChange={(e) => {
                         if (!encryptionKey) {
                             invokeAlert(true, "warning", "Click on the eye icon to decrypt and perform search");
@@ -392,6 +411,9 @@ function CardIcons({ visibleCardIndices, index, toggleCardFlip, handleCardAction
             </IconButton>
             <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
                 <FlipCameraIcon fontSize="large" />
+            </IconButton>
+            <IconButton>
+                <CloudOffIcon />
             </IconButton>
         </>
     )

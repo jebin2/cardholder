@@ -166,7 +166,7 @@ function App() {
         }
     }
 
-    const keySuccessCallback = useCallback((type, index, localData) => {
+    const keySuccessCallback = useCallback((type, index, localData = cardsData) => {
         switch (type) {
             case "show":
                 toggleCardVisibility(index);

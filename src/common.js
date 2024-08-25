@@ -92,7 +92,7 @@ const openDatabase = () => {
         connection.onupgradeneeded = (event) => {
             const db = event.target.result;
             const objectStore = db.createObjectStore("carddetails", { keyPath: "key" });
-            const indices = ["key", "color", "code", "validtill", "cvv", "name", "brand", "network", "network_type", "is_synced", "is_deleted"];
+            const indices = ["key", "color", "code", "expiry", "cvv", "name", "brand", "network", "network_type", "is_synced", "is_deleted", "last_modified_time"];
             indices.forEach(index => objectStore.createIndex(index, index, { unique: index === "key" }));
         };
         connection.onsuccess = event => resolve(event.target.result);

@@ -12,10 +12,8 @@ export default function ErrorRedirect({ type, message, backgroundColor }) {
 				await truncateIndexedDB();
 				localStorage.removeItem("access_token");
 				localStorage.removeItem("refresh_token");
-				window.location.reload();
-			} else {
-				window.location.href = "/cardholder";
 			}
+			window.location.href = "/cardholder";
 		}
 	};
 

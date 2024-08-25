@@ -138,8 +138,10 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                         is_synced: false,
                         is_deleted: false
                     }
+                    cardObj.last_modified_time = cardObj.key;
                     if (viewMode === "edit") {
                         cardObj = {...cardObj, key: cardsData[selectedCardIndex].key}
+                        cardObj.last_modified_time = new Date().getTime();
                     }
                     upsertCardData(cardObj);
                 }}>{viewMode === "edit" ? "Save" : "Add"}</Button>

@@ -40,7 +40,6 @@ function checkServiceWorker(swUrl, config, isLocalhost) {
 			if (response.status === 404 || (contentType && !contentType.includes('javascript'))) {
 				if (isLocalhost) {
 					unregisterServiceWorker();
-					// window.location.reload();
 				}
 			} else {
 				registerServiceWorker(swUrl, config);

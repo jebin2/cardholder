@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-    AppBar, Box, Toolbar, Typography, IconButton, Chip, Input, InputAdornment, Tooltip
+    AppBar, Box, Toolbar, Typography, IconButton, Chip, Input, InputAdornment
 } from '@mui/material';
 import {
     FlipCameraAndroid as FlipCameraIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, AddCard as AddCardIcon, Edit as EditIcon, Search
@@ -15,8 +15,8 @@ import SettingsMenu from './SettingsMenu';
 import KeyPopupDialog from './KeyPopupDialog';
 import AddCardDialog from './AddCardDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloudOffIcon from '@mui/icons-material/CloudOff';
 import ErrorRedirect from './ErrorRedirect';
+import Sync from "./Sync";
 
 const backgroundColor = "#564bf5";
 const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
@@ -151,6 +151,7 @@ function App() {
             setIsLoading(true);
             let delData = localData[index];
             delData.is_deleted = true;
+            delData.last_modified_time = new Date().getTime();
             const response = await processCardData("delete", delData);
             finalContent = response;
             if (response.length === 0) {
@@ -219,25 +220,11 @@ function App() {
             <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
                 <FlipCameraIcon fontSize="large" />
             </IconButton>
-            {!cardsData[index].is_synced && <IconButton className='sync-icon' onClick={() => syncAll()}>
-                <CloudOffIcon />
-            </IconButton> }
+            {!cardsData[index].is_synced &&
+                <Sync from="card" setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
+             }
         </>
     ), [cardsData]);
-
-    const syncAll = () => {
-        setIsLoading(true);
-        processCardData("pushToServer")
-            .then((response) => {
-                setCardsData(response)
-                setIsLoading(false);
-                invokeAlert(true, "success", "Sync Competed");
-            })
-            .catch(() => {
-                setIsLoading(false);
-                invokeAlert(true, "error", "Issue with Sync try again later.");
-            });
-    }
 
     return (
         <>

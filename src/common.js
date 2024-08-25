@@ -161,5 +161,6 @@ const decryptData = (encryptedData, encryptionKey, CryptoJS) => CryptoJS.AES.dec
 module.exports = {
     processCardData,
     encryptData,
-    decryptData
+    decryptData,
+    truncateIndexedDB
 };

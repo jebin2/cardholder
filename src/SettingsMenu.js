@@ -8,6 +8,7 @@ import Sync from "./Sync";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { processCardData } from './common';
 import InfoDialog from './InfoDialog';
+import ErrorRedirect from './ErrorRedirect';
 
 export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoading, setCardsData, setErrorMessage }) {
     const clientId = window.location.host.includes("localhost") ? "386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com" : "386326794734-7vscbpqmdplr1grnt7ddva2c62597nut.apps.googleusercontent.com";
@@ -21,6 +22,7 @@ export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoadin
     };
     const [showDeleteOption, setShowDeleteOption] = useState(!!localStorage.getItem("access_token"));
     const [infoOpen, setInfoOpen] = useState(false);
+    const [showResetPopUp, setShowResetPopUp] = useState();
     const deleteFromGoogleDrive = async () => {
         try {
             setIsLoading(true);
@@ -86,8 +88,14 @@ export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoadin
                 }}>
                     App Info
                 </MenuItem>
+                <MenuItem onClick={() => {
+                    setShowResetPopUp(true);
+                }}>
+                    Reset App
+                </MenuItem>
             </Menu>
             <InfoDialog backgroundColor={backgroundColor} open={infoOpen} setOpen={setInfoOpen} />
+            {showResetPopUp && <ErrorRedirect type="reset" message="Resetting the app will delete all the app related data from local." backgroundColor={backgroundColor} /> }
         </div>
     );
 }

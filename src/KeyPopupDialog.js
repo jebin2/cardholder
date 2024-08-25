@@ -1,25 +1,64 @@
-import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Slider } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Slider, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff, LockClock, Key as KeyIcon } from '@mui/icons-material';
 import CryptoJS from 'crypto-js';
 import { decryptData } from './common';
 
 const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, viewMode, selectedCardIndex, cardData, callback, setKeyDuration, setEncryptionKey }) => {
-
     const [key, setKey] = useState("");
     const [keyTTL, setKeyTTL] = useState(30);
     const [error, setError] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
-    const marks = React.useMemo(() => {
+    const marks = useMemo(() => {
         return Array.from({ length: 10 }, (_, i) => ({
             value: (i + 1) * 10,
             label: `${(i + 1) * 10}s`,
         }));
     }, []);
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
+    const handleSubmit = () => {
+        if (key.length < 10) {
+            setError(true);
+            setErrorMsg('Minimum 10 characters required');
+            return;
+        }
+        if (cardData && cardData.code && decryptData(cardData.code, key, CryptoJS).length !== 19) {
+            setError(true);
+            setErrorMsg('Invalid Key');
+            return;
+        }
+        setError(false);
+        setErrorMsg("");
+        if (viewMode === "show") {
+            setKeyDuration(keyTTL);
+        }
+        setEncryptionKey(key);
+        callback(viewMode, selectedCardIndex);
+        setIsKeyDialogOpen(false);
+    };
+
+    const buttonStyle = () => (
+        {
+            minWidth: '100px',
+            transition: 'all 0.3s',
+            '&:hover': {
+                transform: 'translateY(-2px)',
+            }
+        }
+    )
+
     return (
         <Dialog
             open={isKeyDialogOpen}
+            onClose={() => setIsKeyDialogOpen(false)}
             PaperProps={{
                 sx: {
                     width: "340px",
@@ -28,9 +67,10 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     border: "6px solid black",
                     '& .MuiDialogTitle-root': {
                         fontWeight: '800',
+                        padding: '16px',
                     },
                     '& .MuiDialogContent-root': {
-                        padding: '16px',
+                        padding: '24px 16px',
                     },
                     '& .MuiButton-root': {
                         fontWeight: '800',
@@ -40,12 +80,19 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                             fontWeight: '800',
                             color: 'white',
                             backgroundColor: 'black',
+                            borderColor: 'black',
                         },
                     },
                 },
             }}
+            aria-labelledby="key-dialog-title"
         >
-            <DialogTitle>Key</DialogTitle>
+            <DialogTitle id="key-dialog-title">
+                <Box display="flex" alignItems="center">
+                    <KeyIcon style={{ marginRight: '8px' }} />
+                    <Typography variant="h6" component="span">Enter Encryption Key</Typography>
+                </Box>
+            </DialogTitle>
             <DialogContent>
                 <TextField
                     autoFocus
@@ -53,41 +100,47 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                     margin="dense"
                     id="cardKey"
                     name="cardKey"
-                    label="Key"
-                    type="password"
+                    label="Encryption Key"
+                    type={showPassword ? 'text' : 'password'}
                     fullWidth
                     variant="standard"
                     value={key}
-                    onChange={(e) => {
-                        setKey(e.target.value)
-                    }}
+                    onChange={(e) => setKey(e.target.value)}
                     error={error}
                     helperText={errorMsg}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        )
+                    }}
                     sx={{
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                borderColor: 'black',
-                                borderWidth: '2px',
-                            },
-                            '&:hover fieldset': {
-                                borderColor: 'black',
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: 'black !important',
-                                borderWidth: '2px',
-                            },
-                        },
-                        '& .MuiInputBase-input': {
+                        '& .MuiInputBase-root': {
                             color: 'black',
                             fontSize: '0.9rem',
-                            borderBottom: "2px solid black"
+                            '&::before': {
+                                borderBottom: "2px solid black"
+                            },
+                            '&::after': {
+                                borderBottom: "2px solid black"
+                            },
+                            '&:hover:not(.Mui-disabled)::before': {
+                                borderBottom: "2px solid black"
+                            },
                         },
-                        '& .MuiInput-root.Mui-focused::after': {
-                            borderBottom: "2px solid black"
-                        },
-                        '& .MuiInputBase-input::placeholder': {
+                        '& .MuiInputAdornment-root': {
                             color: 'black',
-                            opacity: 1,
+                        },
+                        '& .MuiIconButton-root': {
+                            color: 'black',
                         },
                         '& .MuiFormLabel-root': {
                             color: 'black',
@@ -95,15 +148,23 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                                 color: 'black'
                             },
                         },
-                        // Override the default focus shadow
-                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            boxShadow: 'none',
+                        '& .Mui-error': {
+                            color: 'red',
+                            '&::after': {
+                                borderBottomColor: 'red'
+                            }
                         },
+                        '& .MuiFormHelperText-root': {
+                            color: 'red',
+                        }
                     }}
                 />
                 {viewMode === "show" && (
                     <Box sx={{ width: 300, marginTop: 2 }}>
-                        <Typography variant="body2" gutterBottom>Time to Destroy</Typography>
+                        <Typography variant="body2" gutterBottom>
+                            <LockClock fontSize="small" style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                            Time to Destroy
+                        </Typography>
                         <Slider
                             name="timeToDestroy"
                             defaultValue={30}
@@ -123,32 +184,20 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                 </Typography>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {
-                    setError(false);
-                    setIsKeyDialogOpen(false);
-                }}>
-                    Close
+                <Button
+                    onClick={() => setIsKeyDialogOpen(false)}
+                    color="primary"
+                    variant="outlined"
+                    sx={buttonStyle}
+                >
+                    Cancel
                 </Button>
-                <Button onClick={() => {
-                    if (key.length < 10) {
-                        setError(true);
-                        setErrorMsg('Minimum 10 characters required')
-                        return;
-                    }
-                    if (cardData && cardData.code && decryptData(cardData.code, key, CryptoJS).length !== 19) {
-                        setError(true);
-                        setErrorMsg('Invalid Key')
-                        return;
-                    }
-                    setError(false);
-                    setErrorMsg("");
-                    if (viewMode === "show") {
-                        setKeyDuration(keyTTL);
-                    }
-                    setEncryptionKey(key)
-                    callback(viewMode, selectedCardIndex);
-                    setIsKeyDialogOpen(false);
-                }}>
+                <Button
+                    color="primary"
+                    variant="outlined"
+                    onClick={handleSubmit}
+                    sx={buttonStyle}
+                >
                     {viewMode === "create" ? "Add" : viewMode === "edit" ? "Edit" : viewMode === "delete" ? "Delete" : "Show"}
                 </Button>
             </DialogActions>

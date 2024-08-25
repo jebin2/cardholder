@@ -1,18 +1,40 @@
+let timeoutId = null;
+
+function syncToServer() {
+    if(!timeoutId) {
+        timeoutId = setTimeout(async () => {
+            await processCardData("pushToServer");
+            timeoutId = null;
+        }, 1000);
+    }
+}
 const processCardData = async (type, content) => {
     try {
-        const netlifyUrl = window.location.host.includes("localhost") 
-            ? "http://localhost:8888" 
+        const netlifyUrl = window.location.host.includes("localhost")
+            ? "http://localhost:8888"
             : "https://jeapis.netlify.app";
+        const accessToken = localStorage.getItem("access_token");
+        const refreshToken = localStorage.getItem("refresh_token");
+        
+        if(accessToken && timeoutId == null) {
+            syncToServer();
+        }
+        if ((type === "pushToServer" || type === "deleteFromServer") && !accessToken) {
+            type = type === "pushToServer" ? "fetch" : "delete";
+        }
 
-        if (localStorage.getItem("googleDriveSyncEnabled") === "true") {
+        if (type === "pushToServer" || type === "deleteFromServer") {
+            const cardHolderDB = await openDatabase();
+            const cardDetails = type === "pushToServer" ? await getAllData(cardHolderDB) : null;
+
             const response = await fetch(`${netlifyUrl}/.netlify/functions/getCardHolderData`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type,
-                    access_token: localStorage.getItem("access_token"),
-                    refresh_token: localStorage.getItem("refresh_token"),
-                    content
+                    type: type === "pushToServer" ? "create" : "delete",
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                    content: cardDetails
                 })
             });
 
@@ -23,20 +45,25 @@ const processCardData = async (type, content) => {
             const data = await response.json();
 
             if (data.content) {
-                if (type === "delete") {
-                    ["access_token", "refresh_token", "googleDriveSyncEnabled"].forEach(key => localStorage.removeItem(key));
-                } else {
+                if (data.access_token) {
                     localStorage.setItem("access_token", data.access_token);
                     localStorage.setItem("refresh_token", data.refresh_token);
+                } else {
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("refresh_token");
                 }
-                return offlineData("upsert", content);
+
+                data.content.forEach(con => {
+                    con.is_synced = type === "pushToServer";
+                });
+                await truncateIndexedDB();
+                return offlineData("upsert", data.content);
             }
             return [];
         } else {
             return offlineData(type, content);
         }
     } catch (e) {
-        console.error("Error in processCardData:", e);
         return offlineData(type, content);
     }
 };
@@ -48,14 +75,11 @@ const offlineData = async (type, cardObj) => {
             if (Array.isArray(cardObj)) {
                 await batchUpsertData(cardHolderDB, cardObj);
             } else {
-                cardObj.is_deleted = false;
                 await upsertData(cardHolderDB, cardObj);
             }
             break;
         case "delete":
-            cardObj.is_deleted = true;
             await upsertData(cardHolderDB, cardObj);
-            // await deleteData(cardHolderDB, cardObj);
             break;
     }
     const cardDetails = await getAllData(cardHolderDB);
@@ -90,7 +114,6 @@ const upsertData = (db, cardObj) => {
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(["carddetails"], "readwrite");
         const objectStore = transaction.objectStore("carddetails");
-        cardObj.is_synced = false;
         const request = objectStore.put(cardObj);
         request.onsuccess = () => resolve(cardObj);
         request.onerror = event => reject(event.target.error);
@@ -105,8 +128,6 @@ const batchUpsertData = (db, cardObjects) => {
         const results = [];
 
         cardObjects.forEach(cardObj => {
-            cardObj.is_synced = false;
-            cardObj.is_deleted = false;
             const request = objectStore.put(cardObj);
             request.onsuccess = () => results.push(cardObj);
             request.onerror = event => console.error("Error upserting card:", event.target.error);
@@ -117,16 +138,22 @@ const batchUpsertData = (db, cardObjects) => {
     });
 };
 
-const deleteData = (db, cardObj) => {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(["carddetails"], "readwrite");
+const truncateIndexedDB = async () => {
+    return new Promise(async (resolve, reject) => {
+        const cardHolderDB = await openDatabase();
+
+        const transaction = cardHolderDB.transaction(["carddetails"], "readwrite");
+
         const objectStore = transaction.objectStore("carddetails");
-        cardObj.is_synced = false;
-        const request = objectStore.delete(cardObj.key);
-        request.onsuccess = () => resolve(cardObj);
-        request.onerror = event => reject(event.target.error);
+
+        const objectStoreRequest = objectStore.clear();
+
+        objectStoreRequest.onsuccess = () => resolve('Database truncated successfully');
+
+        objectStoreRequest.onerror = (event) => reject(`Error opening database: ${event.target.error}`);
     });
 };
+
 
 const encryptData = (data, encryptionKey, CryptoJS) => CryptoJS.AES.encrypt(data, encryptionKey).toString();
 const decryptData = (encryptedData, encryptionKey, CryptoJS) => CryptoJS.AES.decrypt(encryptedData, encryptionKey).toString(CryptoJS.enc.Utf8);

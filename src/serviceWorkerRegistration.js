@@ -24,7 +24,7 @@ export function register(config) {
 
 function registerServiceWorker(swUrl, config) {
 	navigator.serviceWorker
-		.register(swUrl, {type: "module"})
+		.register(swUrl)
 		.then((registration) => {
 			handleServiceWorkerUpdate(registration, config);
 		})

@@ -7,7 +7,7 @@ import {
 } from '@mui/icons-material';
 import './App.css';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
-import { processCardData, decryptData } from './common';
+import { processCardData, decryptData, truncateIndexedDB } from './common';
 import CryptoJS from 'crypto-js';
 import Loading from './Loading';
 import StateAlert from './StateAlert';
@@ -16,7 +16,6 @@ import KeyPopupDialog from './KeyPopupDialog';
 import AddCardDialog from './AddCardDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const backgroundColor = "#564bf5";
 const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
@@ -40,12 +39,7 @@ function App() {
 
     const saveToken = async (code) => {
         try {
-            let content = fetchCardData();
-            if (content) {
-                content = JSON.parse(content);
-            } else {
-                content = [];
-            }
+            const content = await processCardData("fetch");
             setIsLoading(true);
             const response = await fetch(netlifyUrl + '/.netlify/functions/googleAuth', {
                 method: 'POST',
@@ -57,8 +51,10 @@ function App() {
             const data = await response.json();
             localStorage.setItem("access_token", data.response.access_token);
             localStorage.setItem("refresh_token", data.response.refresh_token);
-            // To-Do: need to do upsert
-            localStorage.setItem("googleDriveSyncEnabled", "true");
+            if (data.content) {
+                await truncateIndexedDB();
+                await processCardData("upsert", data.content);
+            }
         } catch (error) {
             console.error('Error fetching tokens:', error);
         } finally {
@@ -76,7 +72,6 @@ function App() {
             if (response.length === 0) {
                 setErrorMessage("No data available.");
             }
-            // serviceWorkerRegistration.sync.register('sync-to-drive');
         } catch (error) {
             finalContent = [];
             setErrorMessage(`Error fetching card data: ${error.message}`);
@@ -97,13 +92,13 @@ function App() {
     }, []);
 
     const toggleCardFlip = useCallback((index) => {
-        setFlippedCardIndices(prev => 
+        setFlippedCardIndices(prev =>
             prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
         );
     }, []);
 
     const toggleCardVisibility = useCallback((index) => {
-        setVisibleCardIndices(prev => 
+        setVisibleCardIndices(prev =>
             prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
         );
     }, []);
@@ -131,14 +126,14 @@ function App() {
         handleCardAction("create", -1);
     };
 
-    const handleCardAction = useCallback((type, index) => {
+    const handleCardAction = useCallback((type, index, localData) => {
         setViewMode(type);
         setSelectedCardIndex(index);
-                if (encryptionKey) {
-                    keySuccessCallback(type, index);
-                } else {
-                    setIsKeyDialogOpen(true);
-                }
+        if (encryptionKey) {
+            keySuccessCallback(type, index, localData);
+        } else {
+            setIsKeyDialogOpen(true);
+        }
     }, [encryptionKey]);
 
     const invokeAlert = useCallback((state, type, message) => {
@@ -147,11 +142,13 @@ function App() {
         setAlertMessage(message);
     }, []);
 
-    const deleteCard = async (index) => {
+    const deleteCard = async (index, localData) => {
         let finalContent;
         try {
             setIsLoading(true);
-            const response = await processCardData("delete", cardsData[index]);
+            let delData = localData[index];
+            delData.is_deleted = true;
+            const response = await processCardData("delete", delData);
             finalContent = response;
             if (response.length === 0) {
                 setErrorMessage("No data available.");
@@ -166,7 +163,7 @@ function App() {
         }
     }
 
-    const keySuccessCallback = useCallback((type, index) => {
+    const keySuccessCallback = useCallback((type, index, localData) => {
         switch (type) {
             case "show":
                 toggleCardVisibility(index);
@@ -180,7 +177,7 @@ function App() {
             case "delete":
                 setKeyDuration(0);
                 setVisibleCardIndices([]);
-                deleteCard(index);
+                deleteCard(index, localData);
                 break;
             case "showAll":
                 setKeyDuration(0);
@@ -199,15 +196,15 @@ function App() {
     const filteredCardsData = useMemo(() => {
         return cardsData.filter(card => {
             if (!encryptionKey) return true;
-            return Object.keys(card).some(key => 
+            return Object.keys(card).some(key =>
                 !["color", "key"].includes(key) && decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
     }, [cardsData, encryptionKey, searchQuery]);
-
+    
     const CardIcons = useCallback(({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) => (
         <>
-            <IconButton className="delete-icon" onClick={() => handleCardAction("delete", index)}>
+            <IconButton className="delete-icon" onClick={() => handleCardAction("delete", index, cardsData)}>
                 <DeleteIcon />
             </IconButton>
             <IconButton className="edit-icon" onClick={() => handleCardAction("edit", index)}>
@@ -219,11 +216,25 @@ function App() {
             <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
                 <FlipCameraIcon fontSize="large" />
             </IconButton>
-            <IconButton>
+            {!cardsData[index].is_synced && <IconButton className='sync-icon' onClick={() => syncAll()}>
                 <CloudOffIcon />
-            </IconButton>
+            </IconButton> }
         </>
-    ), []);
+    ), [cardsData]);
+
+    const syncAll = () => {
+        setIsLoading(true);
+        processCardData("pushToServer")
+            .then((response) => {
+                setCardsData(response)
+                setIsLoading(false);
+                invokeAlert(true, "success", "Sync Competed");
+            })
+            .catch(() => {
+                setIsLoading(false);
+                invokeAlert(true, "error", "Issue with Sync try again later.");
+            });
+    }
 
     return (
         <>
@@ -309,7 +320,7 @@ function App() {
                     }}
                 />
             </div>}
-            <div className="content" style={cardsData.length === 0 ? {paddingTop: "5rem"} : {}}>
+            <div className="content" style={cardsData.length === 0 ? { paddingTop: "5rem" } : {}}>
                 {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
                     {commonError === "No data available." ?
                         <Chip label="Add Card" variant="outlined" onClick={() => openAddCardDialog(true)} icon={<AddCardIcon fontSize='large' />} size='medium' sx={{
@@ -389,34 +400,6 @@ function App() {
             <Loading show={isLoading} />
         </>
     );
-}
-
-function CardIcons({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) {
-    return (
-        <>
-            <IconButton className="delete-icon" onClick={() => {
-                handleCardAction("delete", index);
-            }}>
-                <DeleteIcon />
-            </IconButton>
-            <IconButton className="edit-icon" onClick={() => {
-                handleCardAction("edit", index);
-            }}>
-                <EditIcon />
-            </IconButton>
-            <IconButton className='ai-icon' onClick={() => {
-                handleCardAction("show", index);
-            }}>
-                {visibleCardIndices.includes(index) ? <VisibilityIcon /> : <VisibilityOffIcon />}
-            </IconButton>
-            <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
-                <FlipCameraIcon fontSize="large" />
-            </IconButton>
-            <IconButton>
-                <CloudOffIcon />
-            </IconButton>
-        </>
-    )
 }
 
 export default App;

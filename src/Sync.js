@@ -10,46 +10,19 @@ export default function Sync({ onSyncComplete, setIsLoading }) {
         scope: 'https://www.googleapis.com/auth/drive.appdata',  // Add required scopes
     });
 
-    
-
-    const fetchCardData = async () => {
-        let finalContent = [];
-        try {
-            setIsLoading(true);
-            const response = await processCardData("fetch");
-            finalContent = response;
-        } catch (error) {
-            finalContent = [];
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     return (
         <div>
             <div onClick={() => {
                 setIsLoading(true);
                 if (localStorage.getItem("access_token")) {
-                    processCardData("fetch")
+                    processCardData("pushToServer")
                         .then((response) => {
-                            let localData = fetchCardData();
-                            if (response.length !== localData.length) {
-                                processCardData("upsert", localData)
-                                    .then((response) => {
-                                        setIsLoading(false);
-                                        onSyncComplete(true, "success", "Sync Competed");
-                                    })
-                                    .catch((error) => {
-                                        setIsLoading(false);
-                                        onSyncComplete(true, "error", "Issue with Sync try again later.");
-                                    });
-                            } else {
-                                setIsLoading(false);
-                                onSyncComplete(true, "success", "Sync Competed");
-                            }
+                            setIsLoading(false);
+                            onSyncComplete(true, "success", "Sync Competed");
                         })
-                        .catch(() => {
-                            googleLogin();
+                        .catch((error) => {
+                            setIsLoading(false);
+                            onSyncComplete(true, "error", "Issue with Sync try again later.");
                         });
                 } else {
                     googleLogin();

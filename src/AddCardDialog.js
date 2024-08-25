@@ -134,7 +134,9 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                         brand: encryptData(cardDetails.brand, encryptionKey, CryptoJS),
                         network: encryptData(cardDetails.network, encryptionKey, CryptoJS),
                         network_type: encryptData(cardDetails.network_type, encryptionKey, CryptoJS),
-                        color: cardDetails.color
+                        color: cardDetails.color,
+                        is_synced: false,
+                        is_deleted: false
                     }
                     if (viewMode === "edit") {
                         cardObj = {...cardObj, key: cardsData[selectedCardIndex].key}

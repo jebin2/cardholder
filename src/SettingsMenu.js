@@ -18,11 +18,11 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, 
     const handleClose = () => {
         setAnchorEl(null);
     };
-    const [showDeleteOption, setShowDeleteOption] = useState(localStorage.getItem("googleDriveSyncEnabled") === "true");
+    const [showDeleteOption, setShowDeleteOption] = useState(!!localStorage.getItem("access_token"));
     const deleteDataFromGoogleDrive = async () => {
         try {
             setIsLoading(true);
-            await processCardData("delete");
+            await processCardData("deleteFromServer");
             setShowDeleteOption(false);
         } catch (error) {
             setErrorMessage(`Error fetching card data: ${error.message}`);

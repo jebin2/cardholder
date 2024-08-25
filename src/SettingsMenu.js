@@ -7,8 +7,9 @@ import './App.css';
 import Sync from "./Sync";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { processCardData } from './common';
+import InfoDialog from './InfoDialog';
 
-export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, setErrorMessage }) {
+export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoading, setCardsData, setErrorMessage }) {
     const clientId = window.location.host.includes("localhost") ? "386326794734-55j7cufjv2fgn75aa6d96b32i4j817o8.apps.googleusercontent.com" : "386326794734-7vscbpqmdplr1grnt7ddva2c62597nut.apps.googleusercontent.com";
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -19,6 +20,7 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, 
         setAnchorEl(null);
     };
     const [showDeleteOption, setShowDeleteOption] = useState(!!localStorage.getItem("access_token"));
+    const [infoOpen, setInfoOpen] = useState(false);
     const deleteDataFromGoogleDrive = async () => {
         try {
             setIsLoading(true);
@@ -46,16 +48,30 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData, 
                 MenuListProps={{
                     'aria-labelledby': 'basic-button',
                 }}
+                sx={{
+                    '& .MuiPaper-root': {
+
+                        borderRadius: '12px',
+                        boxShadow: `8px 8px 0px ${backgroundColor}`,
+                        border: "6px solid black",
+                    },
+                }}
             >
                 {showDeleteOption ?
                     <MenuItem onClick={deleteDataFromGoogleDrive}>
-                        Delete Data From Google Drive
+                        Delete From Google Drive
                     </MenuItem> : <MenuItem onClick={handleClose}>
                         <GoogleOAuthProvider clientId={clientId}>
                             <Sync setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
                         </GoogleOAuthProvider>
                     </MenuItem>}
+                    <MenuItem onClick={() => {
+                        setInfoOpen(true);
+                    }}>
+                        App Info
+                    </MenuItem>
             </Menu>
+            <InfoDialog backgroundColor={backgroundColor} open={infoOpen} setOpen={setInfoOpen} />
         </div>
     );
 }

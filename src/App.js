@@ -276,7 +276,7 @@ function App() {
                                 backgroundColor: "black"
                             }
                         }} onClick={() => openAddCardDialog(true)}><AddCardIcon /></IconButton>
-                        <SettingsMenu invokeAlert={invokeAlert} setIsLoading={setIsLoading} setCardsData={setCardsData} setErrorMessage={setErrorMessage} />
+                        <SettingsMenu backgroundColor={backgroundColor} invokeAlert={invokeAlert} setIsLoading={setIsLoading} setCardsData={setCardsData} setErrorMessage={setErrorMessage} />
                     </Toolbar>
                 </AppBar>
             </Box>
@@ -389,7 +389,7 @@ function App() {
 
             <StateAlert backgroundColor={backgroundColor} state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
 
-            <AppBar position="fixed" sx={{
+            {/* <AppBar position="fixed" sx={{
                 backgroundColor: "#333",
                 color: "white",
                 textAlign: "center",
@@ -399,7 +399,7 @@ function App() {
                 <Toolbar>
                     <Typography variant="h6" sx={{ flexGrow: 1 }}>All card details are stored in an encrypted format.</Typography>
                 </Toolbar>
-            </AppBar>
+            </AppBar> */}
             <Loading show={isLoading} />
         </>
     );

@@ -29,7 +29,7 @@ export default function Sync({ onSyncComplete, setIsLoading }) {
                 }
 
             }}>
-                Sync with Google
+                Sync with Google Drive
             </div>
         </div>
     );

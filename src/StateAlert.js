@@ -3,12 +3,12 @@ import {
     Snackbar, Alert
 } from '@mui/material';
 
-export default function StateAlert({ state, type, message, setAlertState, backgroundColor }) {
+export default function StateAlert({ backgroundColor, state, type, message, setAlertState }) {
     return (
         <Snackbar open={state} autoHideDuration={5000} onClose={() => setAlertState(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             sx={{
                 '& .MuiPaper-root': {
-                  background: {backgroundColor},
+                  background: `${backgroundColor}`,
                   border: "6px solid black",
                   color: "white",
                   fontWeight: "900",

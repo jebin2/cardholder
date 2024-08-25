@@ -21,11 +21,23 @@ export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoadin
     };
     const [showDeleteOption, setShowDeleteOption] = useState(!!localStorage.getItem("access_token"));
     const [infoOpen, setInfoOpen] = useState(false);
-    const deleteDataFromGoogleDrive = async () => {
+    const deleteFromGoogleDrive = async () => {
         try {
             setIsLoading(true);
             await processCardData("deleteFromServer");
             setShowDeleteOption(false);
+            invokeAlert(true, "success", "Delete From Google Drive");
+        } catch (error) {
+            setErrorMessage(`Error fetching card data: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    const syncWithGoogleDrive = async () => {
+        try {
+            setIsLoading(true);
+            await processCardData("pushToServer");
+            invokeAlert(true, "success", "Sync Competed");
         } catch (error) {
             setErrorMessage(`Error fetching card data: ${error.message}`);
         } finally {
@@ -58,18 +70,22 @@ export default function SettingsMenu({ backgroundColor, invokeAlert, setIsLoadin
                 }}
             >
                 {showDeleteOption ?
-                    <MenuItem onClick={deleteDataFromGoogleDrive}>
-                        Delete From Google Drive
-                    </MenuItem> : <MenuItem onClick={handleClose}>
+                    <>
+                        <MenuItem onClick={syncWithGoogleDrive}>
+                            Sync with Google Drive
+                        </MenuItem>
+                        <MenuItem onClick={deleteFromGoogleDrive}>
+                            Delete From Google Drive
+                        </MenuItem></> : <MenuItem onClick={handleClose}>
                         <GoogleOAuthProvider clientId={clientId}>
                             <Sync setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
                         </GoogleOAuthProvider>
                     </MenuItem>}
-                    <MenuItem onClick={() => {
-                        setInfoOpen(true);
-                    }}>
-                        App Info
-                    </MenuItem>
+                <MenuItem onClick={() => {
+                    setInfoOpen(true);
+                }}>
+                    App Info
+                </MenuItem>
             </Menu>
             <InfoDialog backgroundColor={backgroundColor} open={infoOpen} setOpen={setInfoOpen} />
         </div>

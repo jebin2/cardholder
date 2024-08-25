@@ -16,6 +16,7 @@ import KeyPopupDialog from './KeyPopupDialog';
 import AddCardDialog from './AddCardDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
+import ErrorRedirect from './ErrorRedirect';
 
 const backgroundColor = "#564bf5";
 const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
@@ -36,6 +37,7 @@ function App() {
     const [alertState, setAlertState] = useState(false);
     const [alertType, setAlertType] = useState("success");
     const [alertMessage, setAlertMessage] = useState("none");
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
 
     const saveToken = async (code) => {
         try {
@@ -51,15 +53,16 @@ function App() {
             const data = await response.json();
             localStorage.setItem("access_token", data.response.access_token);
             localStorage.setItem("refresh_token", data.response.refresh_token);
-            if (data.content) {
+            if (data.response.content) {
                 await truncateIndexedDB();
-                await processCardData("upsert", data.content);
+                await processCardData("upsert", data.response.content);
             }
+            window.location.href = "/cardholder";
         } catch (error) {
             console.error('Error fetching tokens:', error);
+            setShowErrorPopup(true);
         } finally {
             setIsLoading(false);
-            window.location.href = "/cardholder";
         }
     };
 
@@ -277,6 +280,7 @@ function App() {
                     </Toolbar>
                 </AppBar>
             </Box>
+            {showErrorPopup && <ErrorRedirect backgroundColor={backgroundColor} message="Issue with Google Integration, Please try again later."/>}
             {cardsData.length !== 0 && <div className="search-bar">
                 <Input
                     placeholder="Search by Name, Brand, network or network type"
@@ -383,13 +387,12 @@ function App() {
 
             {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
 
-            <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
+            <StateAlert backgroundColor={backgroundColor} state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
 
             <AppBar position="fixed" sx={{
                 backgroundColor: "#333",
                 color: "white",
                 textAlign: "center",
-                padding: "10px",
                 top: 'auto',
                 bottom: "0"
             }}>

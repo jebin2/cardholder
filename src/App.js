@@ -7,7 +7,7 @@ import {
 } from '@mui/icons-material';
 import './App.css';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
-import { processCardData, decryptData, truncateIndexedDB } from './common';
+import { processCardData, decryptData, truncateIndexedDB, backgroundColor } from './common';
 import CryptoJS from 'crypto-js';
 import Loading from './Loading';
 import StateAlert from './StateAlert';
@@ -18,7 +18,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ErrorRedirect from './ErrorRedirect';
 import Sync from "./Sync";
 
-const backgroundColor = "#564bf5";
 const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
 
 function App() {
@@ -263,11 +262,11 @@ function App() {
                                 backgroundColor: "black"
                             }
                         }} onClick={() => openAddCardDialog(true)}><AddCardIcon /></IconButton>
-                        <SettingsMenu backgroundColor={backgroundColor} invokeAlert={invokeAlert} setIsLoading={setIsLoading} setCardsData={setCardsData} setErrorMessage={setErrorMessage} />
+                        <SettingsMenu invokeAlert={invokeAlert} setIsLoading={setIsLoading} setCardsData={setCardsData} setErrorMessage={setErrorMessage} />
                     </Toolbar>
                 </AppBar>
             </Box>
-            {showErrorPopup && <ErrorRedirect backgroundColor={backgroundColor} message="Issue with Google Integration, Please try again later."/>}
+            {showErrorPopup && <ErrorRedirect message="Issue with Google Integration, Please try again later."/>}
             {cardsData.length !== 0 && <div className="search-bar">
                 <Input
                     placeholder="Search by Name, Brand, network or network type"
@@ -370,23 +369,11 @@ function App() {
                 }
             </div>
 
-            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} backgroundColor={backgroundColor} selectedCardIndex={selectedCardIndex} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
+            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} selectedCardIndex={selectedCardIndex} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
 
-            {isAddCardDialogOpen && <AddCardDialog backgroundColor={backgroundColor} isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
+            {isAddCardDialogOpen && <AddCardDialog isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
 
-            <StateAlert backgroundColor={backgroundColor} state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
-
-            {/* <AppBar position="fixed" sx={{
-                backgroundColor: "#333",
-                color: "white",
-                textAlign: "center",
-                top: 'auto',
-                bottom: "0"
-            }}>
-                <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>All card details are stored in an encrypted format.</Typography>
-                </Toolbar>
-            </AppBar> */}
+            <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
             <Loading show={isLoading} />
         </>
     );

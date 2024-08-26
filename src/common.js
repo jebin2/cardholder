@@ -8,7 +8,8 @@ function syncToServer() {
         }, 1000);
     }
 }
-const processCardData = async (type, content) => {
+
+const processCardData = async (type, content, throwError = false) => {
     try {
         const netlifyUrl = window.location.host.includes("localhost")
             ? "http://localhost:8888"
@@ -16,7 +17,7 @@ const processCardData = async (type, content) => {
         const accessToken = localStorage.getItem("access_token");
         const refreshToken = localStorage.getItem("refresh_token");
         
-        if(accessToken && timeoutId == null) {
+        if (accessToken && timeoutId === null) {
             syncToServer();
         }
         if ((type === "pushToServer" || type === "deleteFromServer") && !accessToken) {
@@ -64,6 +65,9 @@ const processCardData = async (type, content) => {
             return offlineData(type, content);
         }
     } catch (e) {
+        if (throwError) {
+            throw e;
+        }
         return offlineData(type, content);
     }
 };
@@ -158,9 +162,51 @@ const truncateIndexedDB = async () => {
 const encryptData = (data, encryptionKey, CryptoJS) => CryptoJS.AES.encrypt(data, encryptionKey).toString();
 const decryptData = (encryptedData, encryptionKey, CryptoJS) => CryptoJS.AES.decrypt(encryptedData, encryptionKey).toString(CryptoJS.enc.Utf8);
 
+
+const backgroundColor = "#564bf5";
+const dialogSx = () => (
+    {
+        width: "350px",
+        borderRadius: '12px',
+        boxShadow: `8px 8px 0px ${backgroundColor}`,
+        border: "6px solid black",
+        '& .MuiDialogTitle-root': {
+            fontWeight: '800',
+            borderBottom: '2px solid black',
+            padding: '16px',
+        },
+        '& .MuiDialogContent-root': {
+            // padding: '24px 16px',
+        },
+        '& .MuiButton-root': {
+            fontWeight: '800',
+            color: 'black',
+            borderColor: 'black',
+            '&:hover': {
+                fontWeight: '800',
+                color: 'white',
+                backgroundColor: 'black',
+                borderColor: 'black',
+            },
+        },
+    }
+)
+const buttonSx = () => (
+    {
+        minWidth: '100px',
+        transition: 'all 0.3s',
+        '&:hover': {
+            transform: 'translateY(-2px)',
+        }
+    }
+)
+
 module.exports = {
     processCardData,
     encryptData,
     decryptData,
-    truncateIndexedDB
+    truncateIndexedDB,
+    backgroundColor,
+    dialogSx,
+    buttonSx
 };

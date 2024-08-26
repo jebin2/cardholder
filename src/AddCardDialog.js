@@ -3,9 +3,9 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 import CreditCardForm from './CreditCardForm';
 import ColorPicker from './ColorPicker';
 import CryptoJS from 'crypto-js';
-import { processCardData, encryptData, decryptData } from './common';
+import { processCardData, encryptData, decryptData, buttonSx, dialogSx } from './common';
 
-export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, setIsAddCardDialogOpen, viewMode, cardsData, setCardsData, selectedCardIndex, encryptionKey, setIsLoading, setErrorMessage, setKeyDuration }) {
+export default function AddCardDialog ({ isAddCardDialogOpen, setIsAddCardDialogOpen, viewMode, cardsData, setCardsData, selectedCardIndex, encryptionKey, setIsLoading, setErrorMessage, setKeyDuration }) {
     const [cardDetails, setCardDetails] = useState({
         color: selectedCardIndex !== -1 ? cardsData[selectedCardIndex].color : "black",
         code: selectedCardIndex !== -1 ? decryptData(cardsData[selectedCardIndex].code, encryptionKey, CryptoJS) : "",
@@ -56,31 +56,15 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
         }
     };
 
+    let localDialogSX = dialogSx();
+    delete localDialogSX.width;
+    delete localDialogSX['& .MuiDialogTitle-root'].borderBottom;
+
     return (
         <Dialog
             open={isAddCardDialogOpen}
             PaperProps={{
-                sx: {
-                    borderRadius: '12px', // Rounded corners for a retro touch
-                    boxShadow: `8px 8px 0px ${backgroundColor}`, // Warm burnt orange shadow
-                    border: "6px solid black",
-                    '& .MuiDialogTitle-root': {
-                        fontWeight: '800', // Bold title text
-                    },
-                    '& .MuiDialogContent-root': {
-                        padding: '16px', // Padding for dialog content
-                    },
-                    '& .MuiButton-root': {
-                        fontWeight: '800', // Bold title text
-                        color: 'black', // Button text color
-                        borderColor: 'black', // Button border color
-                        '&:hover': {
-                            fontWeight: '800', // Bold title text
-                            color: 'white', // Button text color
-                            backgroundColor: 'black', // Darker olive green for hover
-                        },
-                    },
-                },
+                sx: localDialogSX,
             }}
         >
             <DialogTitle>
@@ -93,11 +77,15 @@ export default function AddCardDialog ({ backgroundColor, isAddCardDialogOpen, s
                 <CreditCardForm handleInputChange={handleInputChange} label={label} placeHolder={placeHolder} cardDetails={cardDetails} errors={errors} />
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {
+                <Button
+                sx={buttonSx}
+                onClick={() => {
                     setKeyDuration(30);
                     setIsAddCardDialogOpen(false)}
                 }>Close</Button>
-                <Button onClick={() => {
+                <Button
+                sx={buttonSx}
+                onClick={() => {
                     let fieldError = {
                         code: "", name: "", cvv: "", expiry: ""
                     }

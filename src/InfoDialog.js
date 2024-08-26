@@ -1,36 +1,16 @@
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { Lock, Refresh, Info } from '@mui/icons-material';
+import { dialogSx, buttonSx } from './common';
 
-export default function InfoDialog({ backgroundColor, open, setOpen }) {
+export default function InfoDialog({ open, setOpen }) {
+
+    let localDialogSX = dialogSx();
+
 	return (
 		<Dialog
 			PaperProps={{
-				sx: {
-					width: "340px",
-					borderRadius: '12px',
-					boxShadow: `8px 8px 0px ${backgroundColor}`,
-					border: "6px solid black",
-					'& .MuiDialogTitle-root': {
-						fontWeight: '800',
-						borderBottom: '2px solid black',
-						padding: '16px',
-					},
-					'& .MuiDialogContent-root': {
-						padding: '16px',
-					},
-					'& .MuiButton-root': {
-						fontWeight: '800',
-						color: 'black',
-						borderColor: 'black',
-						'&:hover': {
-							fontWeight: '800',
-							color: 'white',
-							backgroundColor: 'black',
-							borderColor: 'black',
-						},
-					},
-				},
+				sx: localDialogSX,
 			}}
 			open={open}
 			onClose={() => setOpen(false)}
@@ -69,14 +49,7 @@ export default function InfoDialog({ backgroundColor, open, setOpen }) {
 				<Button
 					onClick={() => setOpen(false)}
 					color="primary"
-					variant="outlined"
-					sx={{
-						minWidth: '100px',
-						transition: 'all 0.3s',
-						'&:hover': {
-							transform: 'translateY(-2px)',
-						}
-					}}
+					sx={buttonSx}
 				>
 					Got it
 				</Button>

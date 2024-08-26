@@ -2,8 +2,9 @@ import React from 'react';
 import {
 	Snackbar, Alert
 } from '@mui/material';
+import { backgroundColor } from './common';
 
-export default function StateAlert({ backgroundColor, state, type, message, setAlertState }) {
+export default function StateAlert({ state, type, message, setAlertState }) {
 	return (
 		<Snackbar open={state} autoHideDuration={5000} onClose={() => setAlertState(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
 			sx={{

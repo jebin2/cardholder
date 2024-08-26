@@ -2,9 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Slider, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff, LockClock, Key as KeyIcon } from '@mui/icons-material';
 import CryptoJS from 'crypto-js';
-import { decryptData } from './common';
+import { decryptData, buttonSx, dialogSx } from './common';
 
-const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, viewMode, selectedCardIndex, cardData, callback, setKeyDuration, setEncryptionKey }) => {
+const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selectedCardIndex, cardData, callback, setKeyDuration, setEncryptionKey }) => {
     const [key, setKey] = useState("");
     const [keyTTL, setKeyTTL] = useState(30);
     const [error, setError] = useState(false);
@@ -45,45 +45,15 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
         setIsKeyDialogOpen(false);
     };
 
-    const buttonStyle = () => (
-        {
-            minWidth: '100px',
-            transition: 'all 0.3s',
-            '&:hover': {
-                transform: 'translateY(-2px)',
-            }
-        }
-    )
+    let localDialogSX = dialogSx();
+    delete localDialogSX['& .MuiDialogTitle-root'].borderBottom;
 
     return (
         <Dialog
             open={isKeyDialogOpen}
             onClose={() => setIsKeyDialogOpen(false)}
             PaperProps={{
-                sx: {
-                    width: "340px",
-                    borderRadius: '12px',
-                    boxShadow: `8px 8px 0px ${backgroundColor}`,
-                    border: "6px solid black",
-                    '& .MuiDialogTitle-root': {
-                        fontWeight: '800',
-                        padding: '16px',
-                    },
-                    '& .MuiDialogContent-root': {
-                        padding: '24px 16px',
-                    },
-                    '& .MuiButton-root': {
-                        fontWeight: '800',
-                        color: 'black',
-                        borderColor: 'black',
-                        '&:hover': {
-                            fontWeight: '800',
-                            color: 'white',
-                            backgroundColor: 'black',
-                            borderColor: 'black',
-                        },
-                    },
-                },
+                sx: localDialogSX,
             }}
             aria-labelledby="key-dialog-title"
         >
@@ -187,16 +157,14 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, backgroundColor, 
                 <Button
                     onClick={() => setIsKeyDialogOpen(false)}
                     color="primary"
-                    variant="outlined"
-                    sx={buttonStyle}
+                    sx={buttonSx}
                 >
                     Cancel
                 </Button>
                 <Button
                     color="primary"
-                    variant="outlined"
                     onClick={handleSubmit}
-                    sx={buttonStyle}
+                    sx={buttonSx}
                 >
                     {viewMode === "create" ? "Add" : viewMode === "edit" ? "Edit" : viewMode === "delete" ? "Delete" : "Show"}
                 </Button>

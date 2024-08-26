@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Typography, Box } from '@mui/material';
 import { Error as ErrorIcon, Refresh as RefreshIcon } from '@mui/icons-material';
-import { truncateIndexedDB } from './common';
+import { truncateIndexedDB, dialogSx, buttonSx } from './common';
 
-export default function ErrorRedirect({ type, message, backgroundColor }) {
+export default function ErrorRedirect({ type, message }) {
 	const [open, setOpen] = useState(true);
 
 	const handleClose = async (event, reason) => {
@@ -17,34 +17,12 @@ export default function ErrorRedirect({ type, message, backgroundColor }) {
 		}
 	};
 
+    let localDialogSX = dialogSx();
+
 	return (
 		<Dialog
 			PaperProps={{
-				sx: {
-					width: "340px",
-					borderRadius: '12px',
-					boxShadow: `8px 8px 0px ${backgroundColor}`,
-					border: "6px solid black",
-					'& .MuiDialogTitle-root': {
-						fontWeight: '800',
-						borderBottom: '2px solid black',
-						padding: '16px',
-					},
-					'& .MuiDialogContent-root': {
-						padding: '24px 16px',
-					},
-					'& .MuiButton-root': {
-						fontWeight: '800',
-						color: 'black',
-						borderColor: 'black',
-						'&:hover': {
-							fontWeight: '800',
-							color: 'white',
-							backgroundColor: 'black',
-							borderColor: 'black',
-						},
-					},
-				},
+				sx: localDialogSX,
 			}}
 			open={open}
 			onClose={handleClose}
@@ -53,7 +31,7 @@ export default function ErrorRedirect({ type, message, backgroundColor }) {
 		>
 			<DialogTitle id="error-dialog-title">
 				<Box display="flex" alignItems="center">
-					{type === 'reset' ? <RefreshIcon style={{ color: "black", marginRight: '8px' }} /> : <ErrorIcon style={{ color: "black", marginRight: '8px' }} />}
+					{type === 'reset' ? <></> : <ErrorIcon style={{ color: "black", marginRight: '8px' }} />}
 					<Typography variant="h6" component="span">{type === 'reset' ? "App Reset" : "Error Occurred"}</Typography>
 				</Box>
 			</DialogTitle>
@@ -66,17 +44,9 @@ export default function ErrorRedirect({ type, message, backgroundColor }) {
 				<Button
 					onClick={handleClose}
 					color="primary"
-					variant="outlined"
-					startIcon={type === 'reset' && <RefreshIcon />}
-					sx={{
-						minWidth: '120px',
-						transition: 'all 0.3s',
-						'&:hover': {
-							transform: 'translateY(-2px)',
-						}
-					}}
+					sx={buttonSx}
 				>
-					{type === 'reset' ? "Refresh Now" : "Okay"}
+					{type === 'reset' ? "Reset Now" : "Okay"}
 				</Button>
 			</DialogActions>
 		</Dialog>

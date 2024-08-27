@@ -69,11 +69,20 @@
     justify-content: space-between;
 }
 
+.card-front {
+    z-index: 2;
+}
+.card.flipped .card-front {
+    z-index: 1;
+}
 .card-back {
+    z-index: 1;
     transform: rotateY(180deg);
     background-color: #2c3e50;
 }
-
+.card.flipped .card-back {
+    z-index: 2;
+}
 .card-number {
     margin-top: 30px;
     font-weight: 600;

@@ -138,7 +138,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
                         <Slider
                             name="timeToDestroy"
                             defaultValue={30}
-                            step={10}
+                            step={6}
                             min={10}
                             marks={marks}
                             valueLabelDisplay="auto"

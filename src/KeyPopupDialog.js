@@ -130,22 +130,25 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
                     }}
                 />
                 {viewMode === "show" && (
-                    <Box sx={{ width: 300, marginTop: 2 }}>
-                        <Typography variant="body2" gutterBottom>
-                            <LockClock fontSize="small" style={{ verticalAlign: 'middle', marginRight: '4px' }} />
-                            Time to Destroy
-                        </Typography>
+                    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 2 }}>
+                    <Typography variant="body2" gutterBottom>
+                        <LockClock fontSize="small" style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                        Time to Destroy
+                    </Typography>
+                    <Box sx={{ width: '80%', maxWidth: 300 }}>
                         <Slider
                             name="timeToDestroy"
                             defaultValue={30}
-                            step={6}
+                            step={10}
                             min={10}
+                            max={60}
                             marks={marks}
                             valueLabelDisplay="auto"
                             value={keyTTL}
                             onChange={(event, newValue) => setKeyTTL(newValue)}
                         />
                     </Box>
+                </Box>
                 )}
                 <Typography variant="caption" sx={{
                     display: 'block', mt: 2, color: 'text.secondary', fontWeight: "800", textAlign: "center"

@@ -12,7 +12,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
     const [showPassword, setShowPassword] = useState(false);
 
     const marks = useMemo(() => {
-        return Array.from({ length: 10 }, (_, i) => ({
+        return Array.from({ length: 6 }, (_, i) => ({
             value: (i + 1) * 10,
             label: `${(i + 1) * 10}s`,
         }));

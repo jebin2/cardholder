@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Menu, MenuItem, IconButton } from '@mui/material';
 import {
     Settings as SettingsIcon
@@ -9,12 +9,12 @@ import { processCardData, backgroundColor } from './common';
 import InfoDialog from './InfoDialog';
 import ErrorRedirect from './ErrorRedirect';
 
-export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData }) {
+export default React.memo(function SettingsMenu({ invokeAlert, setIsLoading, setCardsData }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event) => {
+    const handleClick = useCallback((event) => {
         setAnchorEl(event.currentTarget);
-    };
+    }, []);
     const handleClose = () => {
         setAnchorEl(null);
     };
@@ -114,4 +114,4 @@ export default function SettingsMenu({ invokeAlert, setIsLoading, setCardsData }
             {showError && <ErrorRedirect type={errorType} message={errorMessage} />}
         </div>
     );
-}
+});

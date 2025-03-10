@@ -5,6 +5,39 @@ import {
 import './App.css';
 import { color, fontSize, styled } from '@mui/system';
 
+
+const CustomTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '12px',
+        '& fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.4)', // Subtle white border
+        },
+        '&:hover fieldset': {
+            borderColor: 'rgba(255, 255, 255, 0.7)', // Slightly stronger on hover
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: 'white', // White border when focused
+        },
+    },
+    '& .MuiInputBase-input': {
+        color: 'white', // White text color
+        fontSize: '0.9rem', // Smaller font size for input
+    },
+    '& .MuiInputBase-input::placeholder': {
+        color: 'rgba(255, 255, 255, 0.5)', // Subtle placeholder color
+        opacity: 1,
+    },
+    '& .MuiFormLabel-root': {
+        color: 'rgba(255, 255, 255, 0.6)', // Subtle label color
+        '&.Mui-focused': {
+            color: 'white', // White label color when focused
+        },
+    },
+    '& .MuiFormHelperText-root': {
+        color: "#dc5757",
+        fontSize: "0.8rem",
+    },
+}));
 export default function CreditCardForm({ handleInputChange, label, placeHolder, cardDetails, errors }) {
     const CardContainer = styled(Paper)(({ theme, bgcolor }) => ({
         padding: theme.spacing(2),
@@ -20,39 +53,6 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
         marginBottom: theme.spacing(0.5),
         fontWeight: 700,
         fontSize: '0.9rem', // Smaller font size
-    }));
-
-    const CustomTextField = styled(TextField)(({ theme }) => ({
-        '& .MuiOutlinedInput-root': {
-            borderRadius: '12px',
-            '& fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.4)', // Subtle white border
-            },
-            '&:hover fieldset': {
-                borderColor: 'rgba(255, 255, 255, 0.7)', // Slightly stronger on hover
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: 'white', // White border when focused
-            },
-        },
-        '& .MuiInputBase-input': {
-            color: 'white', // White text color
-            fontSize: '0.9rem', // Smaller font size for input
-        },
-        '& .MuiInputBase-input::placeholder': {
-            color: 'rgba(255, 255, 255, 0.5)', // Subtle placeholder color
-            opacity: 1,
-        },
-        '& .MuiFormLabel-root': {
-            color: 'rgba(255, 255, 255, 0.6)', // Subtle label color
-            '&.Mui-focused': {
-                color: 'white', // White label color when focused
-            },
-        },
-        '& .MuiFormHelperText-root': {
-            color: "#dc5757",
-            fontSize: "0.8rem",
-        },
     }));
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -110,7 +110,7 @@ export default function CreditCardForm({ handleInputChange, label, placeHolder, 
             }}
             onChange={handleChange}
             onFocus={() => handleFocus(name)}
-            errors={errors[name] !== ""}
+            errors={(errors[name] !== "").toString()}
             helperText={errors[name]}
         />
     );

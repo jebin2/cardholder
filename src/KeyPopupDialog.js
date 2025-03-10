@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, Typography, Slider, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff, LockClock, Key as KeyIcon } from '@mui/icons-material';
 import CryptoJS from 'crypto-js';
@@ -24,7 +24,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
         event.preventDefault();
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = useCallback(() => {
         if (key.length < 10) {
             setError(true);
             setErrorMsg('Minimum 10 characters required');
@@ -43,7 +43,7 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
         setEncryptionKey(key);
         callback(viewMode, selectedCardIndex);
         setIsKeyDialogOpen(false);
-    };
+    }, [key, cardData, viewMode, keyTTL, setKeyDuration, setEncryptionKey, callback, selectedCardIndex, setIsKeyDialogOpen]);
 
     let localDialogSX = dialogSx();
     delete localDialogSX['& .MuiDialogTitle-root'].borderBottom;
@@ -176,4 +176,4 @@ const KeyPopupDialog = ({ isKeyDialogOpen, setIsKeyDialogOpen, viewMode, selecte
     );
 };
 
-export default KeyPopupDialog;
+export default React.memo(KeyPopupDialog);

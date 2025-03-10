@@ -21,6 +21,7 @@ import Sync from "./Sync";
 const netlifyUrl = window.location.host.includes("localhost") ? "http://localhost:8888" : "https://jeapis.netlify.app";
 
 function App() {
+    // State management
     const [cardsData, setCardsData] = useState([]);
     const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
     const [visibleCardIndices, setVisibleCardIndices] = useState([]);
@@ -38,7 +39,8 @@ function App() {
     const [alertMessage, setAlertMessage] = useState("none");
     const [showErrorPopup, setShowErrorPopup] = useState(false);
 
-    const saveToken = async (code) => {
+    // Memoized API interactions
+    const saveToken = useCallback(async (code) => {
         try {
             const content = await processCardData("fetch");
             setIsLoading(true);
@@ -63,9 +65,9 @@ function App() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const fetchCardData = async () => {
+    const fetchCardData = useCallback(async () => {
         let finalContent = [];
         try {
             setIsLoading(true);
@@ -81,8 +83,9 @@ function App() {
             setCardsData(finalContent);
             setIsLoading(false);
         }
-    };
+    }, []);
 
+    // Initial data loading
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
@@ -91,8 +94,9 @@ function App() {
         } else {
             fetchCardData();
         }
-    }, []);
+    }, [saveToken, fetchCardData]);
 
+    // Card manipulation functions
     const toggleCardFlip = useCallback((index) => {
         setFlippedCardIndices(prev =>
             prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
@@ -105,50 +109,11 @@ function App() {
         );
     }, []);
 
-    const KeyTimer = useCallback(({ duration }) => (
-        <CountdownCircleTimer
-            strokeWidth={4}
-            size={40}
-            isPlaying
-            duration={duration}
-            colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-            colorsTime={[7, 5, 2, 0]}
-            onComplete={() => {
-                setKeyDuration(0);
-                setEncryptionKey("");
-                setVisibleCardIndices([]);
-            }}
-        >
-            {({ remainingTime }) => remainingTime}
-        </CountdownCircleTimer>
-    ), []);
-
-    const openAddCardDialog = () => {
-        setViewMode("create");
-        handleCardAction("create", -1);
-    };
-
-    const handleCardAction = useCallback((type, index, localData) => {
-        setViewMode(type);
-        setSelectedCardIndex(index);
-        if (encryptionKey) {
-            keySuccessCallback(type, index, localData);
-        } else {
-            setIsKeyDialogOpen(true);
-        }
-    }, [encryptionKey]);
-
-    const invokeAlert = useCallback((state, type, message) => {
-        setAlertState(state);
-        setAlertType(type);
-        setAlertMessage(message);
-    }, []);
-
-    const deleteCard = async (index, localData) => {
+    const deleteCard = useCallback(async (index, localData) => {
         let finalContent;
         try {
             setIsLoading(true);
-            let delData = localData[index];
+            let delData = { ...localData[index] };
             delData.is_deleted = true;
             delData.last_modified_time = new Date().getTime();
             const response = await processCardData("delete", delData);
@@ -164,8 +129,36 @@ function App() {
             setKeyDuration(30);
             setIsLoading(false);
         }
-    }
+    }, []);
 
+    const invokeAlert = useCallback((state, type, message) => {
+        setAlertState(state);
+        setAlertType(type);
+        setAlertMessage(message);
+    }, []);
+
+    // Memoized KeyTimer component
+    const KeyTimer = useMemo(() => {
+        return ({ duration }) => (
+            <CountdownCircleTimer
+                strokeWidth={4}
+                size={40}
+                isPlaying
+                duration={duration}
+                colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+                colorsTime={[7, 5, 2, 0]}
+                onComplete={() => {
+                    setKeyDuration(0);
+                    setEncryptionKey("");
+                    setVisibleCardIndices([]);
+                }}
+            >
+                {({ remainingTime }) => remainingTime}
+            </CountdownCircleTimer>
+        );
+    }, []);
+
+    // Card actions handling
     const keySuccessCallback = useCallback((type, index, localData = cardsData) => {
         switch (type) {
             case "show":
@@ -196,34 +189,150 @@ function App() {
         }
     }, [cardsData, toggleCardVisibility, deleteCard]);
 
+    const handleCardAction = useCallback((type, index, localData) => {
+        setViewMode(type);
+        setSelectedCardIndex(index);
+        if (encryptionKey) {
+            keySuccessCallback(type, index, localData);
+        } else {
+            setIsKeyDialogOpen(true);
+        }
+    }, [encryptionKey, keySuccessCallback]);
+
+    const openAddCardDialog = useCallback(() => {
+        setViewMode("create");
+        handleCardAction("create", -1);
+    }, [handleCardAction]);
+
+    // Memoized filtered cards
     const filteredCardsData = useMemo(() => {
+        if (!searchQuery) return cardsData;
+        
         return cardsData.filter(card => {
             if (!encryptionKey) return true;
             return Object.keys(card).some(key =>
-                !["color", "key"].includes(key) && decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase())
+                !["color", "key"].includes(key) && 
+                decryptData(card[key], encryptionKey, CryptoJS).toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
     }, [cardsData, encryptionKey, searchQuery]);
     
-    const CardIcons = useCallback(({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) => (
-        <>
-            <IconButton className="delete-icon" onClick={() => handleCardAction("delete", index, cardsData)}>
-                <DeleteIcon />
-            </IconButton>
-            <IconButton className="edit-icon" onClick={() => handleCardAction("edit", index)}>
-                <EditIcon />
-            </IconButton>
-            <IconButton className='ai-icon' onClick={() => handleCardAction("show", index)}>
-                {visibleCardIndices.includes(index) ? <VisibilityIcon /> : <VisibilityOffIcon />}
-            </IconButton>
-            <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
-                <FlipCameraIcon fontSize="large" />
-            </IconButton>
-            {!cardsData[index].is_synced &&
-                <Sync from="card" setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
-             }
-        </>
-    ), [cardsData]);
+    // Memoized CardIcons component
+    const CardIcons = useMemo(() => {
+        return ({ visibleCardIndices, index, toggleCardFlip, handleCardAction }) => (
+            <>
+                <IconButton className="delete-icon" onClick={() => handleCardAction("delete", index, cardsData)}>
+                    <DeleteIcon />
+                </IconButton>
+                <IconButton className="edit-icon" onClick={() => handleCardAction("edit", index)}>
+                    <EditIcon />
+                </IconButton>
+                <IconButton className='ai-icon' onClick={() => handleCardAction("show", index)}>
+                    {visibleCardIndices.includes(index) ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                </IconButton>
+                <IconButton className='flip-icon' onClick={() => toggleCardFlip(index)}>
+                    <FlipCameraIcon fontSize="large" />
+                </IconButton>
+                {cardsData[index] && !cardsData[index].is_synced &&
+                    <Sync from="card" setIsLoading={setIsLoading} onSyncComplete={invokeAlert} />
+                }
+            </>
+        );
+    }, [cardsData, handleCardAction, invokeAlert]);
+
+    // Memoized card components
+    const renderCard = useCallback((card, index) => {
+        if (!card) return null;
+        
+        return (
+            <div key={index} className="card-container">
+                <div className={`card ${flippedCardIndices.includes(index) ? 'flipped' : ''}`}>
+                    <div className="card-front" style={{ backgroundColor: card.color }}>
+                        <div className="card-brand">
+                            {visibleCardIndices.includes(index) 
+                                ? decryptData(card.brand, encryptionKey, CryptoJS) 
+                                : "*****"}
+                        </div>
+                        <div className="card-number">
+                            {visibleCardIndices.includes(index) 
+                                ? decryptData(card.code, encryptionKey, CryptoJS).replace(/(\d{4})(?=\d)/g, '$1 ').trim() 
+                                : "**** **** **** ****"}
+                        </div>
+                        <div className="card-info">
+                            <div className="card-name">
+                                {visibleCardIndices.includes(index) 
+                                    ? decryptData(card.name, encryptionKey, CryptoJS) 
+                                    : "***** ********"}
+                            </div>
+                            <div className="card-expiry">
+                                {visibleCardIndices.includes(index) 
+                                    ? decryptData(card.expiry, encryptionKey, CryptoJS) 
+                                    : "**/**"}
+                            </div>
+                        </div>
+                        <CardIcons
+                            visibleCardIndices={visibleCardIndices}
+                            index={index}
+                            toggleCardFlip={toggleCardFlip}
+                            handleCardAction={handleCardAction}
+                        />
+                        <div className="card-type">
+                            {visibleCardIndices.includes(index) 
+                                ? decryptData(card.network, encryptionKey, CryptoJS) 
+                                : "**********"}
+                        </div>
+                        <div className="card-label">
+                            {visibleCardIndices.includes(index) 
+                                ? decryptData(card.network_type, encryptionKey, CryptoJS) 
+                                : "******"}
+                        </div>
+                    </div>
+                    <div className="card-back">
+                        <div className="card-barcode"></div>
+                        <CardIcons
+                            visibleCardIndices={visibleCardIndices}
+                            index={index}
+                            toggleCardFlip={toggleCardFlip}
+                            handleCardAction={handleCardAction}
+                        />
+                        <div className="card-cvv">
+                            {visibleCardIndices.includes(index) 
+                                ? `CVV: ${decryptData(card.cvv, encryptionKey, CryptoJS)}` 
+                                : "CVV: ***"}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }, [CardIcons, flippedCardIndices, visibleCardIndices, encryptionKey, toggleCardFlip, handleCardAction]);
+
+    // Add Card Chip component
+    const AddCardChip = useMemo(() => {
+        return (
+            <Chip 
+                label="Add Card" 
+                variant="outlined" 
+                onClick={openAddCardDialog} 
+                icon={<AddCardIcon fontSize='large' />} 
+                size='medium' 
+                sx={{
+                    padding: "16px 12px",
+                    fontSize: "1.5rem",
+                    border: "4px solid black",
+                    color: "black",
+                    borderRadius: "8px",
+                    boxShadow: `4px 4px 0px ${backgroundColor}`,
+                    transition: "box-shadow 0.3s ease, transform 0.3s ease",
+                    '&:hover': {
+                        boxShadow: `8px 8px 0px ${backgroundColor}`,
+                        transform: "translate(-4px, -4px)",
+                        backgroundColor: "#3C4B1E",
+                        cursor: "pointer",
+                    },
+                }} 
+            />
+        );
+    }, [openAddCardDialog]);
 
     return (
         <>
@@ -261,119 +370,104 @@ function App() {
                             color: "white", marginLeft: "1rem", '&:hover': {
                                 backgroundColor: "black"
                             }
-                        }} onClick={() => openAddCardDialog(true)}><AddCardIcon /></IconButton>
-                        <SettingsMenu invokeAlert={invokeAlert} setIsLoading={setIsLoading} setCardsData={setCardsData} setErrorMessage={setErrorMessage} />
+                        }} onClick={openAddCardDialog}><AddCardIcon /></IconButton>
+                        <SettingsMenu 
+                            invokeAlert={invokeAlert} 
+                            setIsLoading={setIsLoading} 
+                            setCardsData={setCardsData} 
+                            setErrorMessage={setErrorMessage} 
+                        />
                     </Toolbar>
                 </AppBar>
             </Box>
+            
             {showErrorPopup && <ErrorRedirect message="Issue with Google Integration, Please try again later."/>}
-            {cardsData.length !== 0 && <div className="search-bar">
-                <Input
-                    placeholder="Search by Name, Brand, network or network type"
-                    startAdornment={
-                        <>
-                            <InputAdornment position="start" sx={{
-                                marginLeft: "10px"
-                            }}>
+            
+            {cardsData.length !== 0 && (
+                <div className="search-bar">
+                    <Input
+                        placeholder="Search by Name, Brand, network or network type"
+                        startAdornment={
+                            <InputAdornment position="start" sx={{ marginLeft: "10px" }}>
                                 <Search />
                             </InputAdornment>
-                        </>
-                    }
-                    value={searchQuery}
-                    onChange={(e) => {
-                        if (!encryptionKey) {
-                            invokeAlert(true, "warning", "Click on the eye icon to decrypt and perform search");
                         }
-                        setSearchQuery(e.target.value)
-                    }
-                    }
-                    className="search-input"
-                    disableUnderline
-                    sx={{
-                        fontWeight: "800",
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '8px 12px',
-                        width: '80%',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                        border: "6px solid black",
-                        transition: 'box-shadow 0.3s ease',
-                        '& .MuiInputAdornment-root': {
-                            color: 'black'
-                        },
-                        '&:hover, &:focus, &:focus-within, &:active': {
-                            boxShadow: `12px 12px 0px #564bf5`,
-                        },
-                        '& .MuiInputAdornment-root': {
-                            color: 'black',
-                        },
-                    }}
-                />
-            </div>}
-            <div className="content" style={cardsData.length === 0 ? { paddingTop: "5rem" } : {}}>
-                {cardsData.length === 0 ? <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
-                    {commonError === "No data available." ?
-                        <Chip label="Add Card" variant="outlined" onClick={() => openAddCardDialog(true)} icon={<AddCardIcon fontSize='large' />} size='medium' sx={{
-                            padding: "16px 12px",
-                            fontSize: "1.5rem",
-                            border: "4px solid black",  // Burnt orange border for a retro feel
-                            // backgroundColor: "#4A5D23",  // Muted olive green background color
-                            color: "black",  // Burnt orange text color to match the border
-                            borderRadius: "8px",  // Rounded corners
-                            boxShadow: `4px 4px 0px ${backgroundColor}`,  // Warm brown shadow for depth
-                            transition: "box-shadow 0.3s ease, transform 0.3s ease",  // Smooth transition for hover effects
-                            '&:hover': {
-                                boxShadow: `8px 8px 0px ${backgroundColor}`,  // Stronger burnt orange shadow on hover
-                                transform: "translate(-4px, -4px)",  // Move the chip slightly up and left on hover
-                                backgroundColor: "#3C4B1E",  // Slightly darker olive green on hover
-                                cursor: "pointer",  // Pointer cursor on hover
+                        value={searchQuery}
+                        onChange={(e) => {
+                            if (!encryptionKey) {
+                                invokeAlert(true, "warning", "Click on the eye icon to decrypt and perform search");
+                            }
+                            setSearchQuery(e.target.value);
+                        }}
+                        className="search-input"
+                        disableUnderline
+                        sx={{
+                            fontWeight: "800",
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            padding: '8px 12px',
+                            width: '80%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                            border: "6px solid black",
+                            transition: 'box-shadow 0.3s ease',
+                            '&:hover, &:focus, &:focus-within, &:active': {
+                                boxShadow: `12px 12px 0px #564bf5`,
                             },
-                        }} /> :
-                        commonError
-                    }
-                </Typography> :
+                            '& .MuiInputAdornment-root': {
+                                color: 'black',
+                            },
+                        }}
+                    />
+                </div>
+            )}
+            
+            <div className="content" style={cardsData.length === 0 ? { paddingTop: "5rem" } : {}}>
+                {cardsData.length === 0 ? (
+                    <Typography variant="h6" sx={{ flexGrow: 1, justifyContent: "center", display: "flex", marginTop: "5%" }}>
+                        {commonError === "No data available." ? AddCardChip : commonError}
+                    </Typography>
+                ) : (
                     <div className="cards-grid">
-                        {filteredCardsData.map((card, index) => (
-                            <div key={index} className="card-container">
-                                <div className={`card ${flippedCardIndices.includes(index) ? 'flipped' : ''}`}>
-                                    <div className="card-front" style={{ backgroundColor: card.color }}>
-                                        <div className="card-brand">{visibleCardIndices.includes(index) ? decryptData(card.brand, encryptionKey, CryptoJS) : "*****"}</div>
-                                        <div className="card-number">{visibleCardIndices.includes(index) ? decryptData(card.code, encryptionKey, CryptoJS).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : "**** **** **** ****"}</div>
-                                        <div className="card-info">
-                                            <div className="card-name">{visibleCardIndices.includes(index) ? decryptData(card.name, encryptionKey, CryptoJS) : "***** ********"}</div>
-                                            <div className="card-expiry">{visibleCardIndices.includes(index) ? decryptData(card.expiry, encryptionKey, CryptoJS) : "**/**"}</div>
-                                        </div>
-                                        <CardIcons
-                                            visibleCardIndices={visibleCardIndices}
-                                            index={index}
-                                            toggleCardFlip={toggleCardFlip}
-                                            handleCardAction={handleCardAction}
-                                        />
-                                        <div className="card-type">{visibleCardIndices.includes(index) ? decryptData(card.network, encryptionKey, CryptoJS) : "**********"}</div>
-                                        <div className="card-label">{visibleCardIndices.includes(index) ? decryptData(card.network_type, encryptionKey, CryptoJS) : "******"}</div>
-                                    </div>
-                                    <div className="card-back">
-                                        <div className="card-barcode"></div>
-                                        <CardIcons
-                                            visibleCardIndices={visibleCardIndices}
-                                            index={index}
-                                            toggleCardFlip={toggleCardFlip}
-                                            handleCardAction={handleCardAction}
-                                        />
-                                        <div className="card-cvv">{visibleCardIndices.includes(index) ? `CVV: ${decryptData(card.cvv, encryptionKey, CryptoJS)}` : "CVV: ***"}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                        {filteredCardsData.map((card, index) => renderCard(card, index))}
                     </div>
-                }
+                )}
             </div>
 
-            {isKeyDialogOpen && <KeyPopupDialog isKeyDialogOpen={isKeyDialogOpen} setIsKeyDialogOpen={setIsKeyDialogOpen} selectedCardIndex={selectedCardIndex} viewMode={viewMode} setEncryptionKey={setEncryptionKey} setKeyDuration={setKeyDuration} cardData={cardsData[0]} callback={keySuccessCallback} />}
+            {isKeyDialogOpen && (
+                <KeyPopupDialog 
+                    isKeyDialogOpen={isKeyDialogOpen} 
+                    setIsKeyDialogOpen={setIsKeyDialogOpen} 
+                    selectedCardIndex={selectedCardIndex} 
+                    viewMode={viewMode} 
+                    setEncryptionKey={setEncryptionKey} 
+                    setKeyDuration={setKeyDuration} 
+                    cardData={cardsData[0]} 
+                    callback={keySuccessCallback} 
+                />
+            )}
 
-            {isAddCardDialogOpen && <AddCardDialog isAddCardDialogOpen={isAddCardDialogOpen} setIsAddCardDialogOpen={setIsAddCardDialogOpen} viewMode={viewMode} cardsData={cardsData} setCardsData={setCardsData} setIsLoading={setIsLoading} selectedCardIndex={selectedCardIndex} setErrorMessage={setErrorMessage} encryptionKey={encryptionKey} setKeyDuration={setKeyDuration} />}
+            {isAddCardDialogOpen && (
+                <AddCardDialog 
+                    isAddCardDialogOpen={isAddCardDialogOpen} 
+                    setIsAddCardDialogOpen={setIsAddCardDialogOpen} 
+                    viewMode={viewMode} 
+                    cardsData={cardsData} 
+                    setCardsData={setCardsData} 
+                    setIsLoading={setIsLoading} 
+                    selectedCardIndex={selectedCardIndex} 
+                    setErrorMessage={setErrorMessage} 
+                    encryptionKey={encryptionKey} 
+                    setKeyDuration={setKeyDuration} 
+                />
+            )}
 
-            <StateAlert state={alertState} type={alertType} message={alertMessage} setAlertState={setAlertState} />
+            <StateAlert 
+                state={alertState} 
+                type={alertType} 
+                message={alertMessage} 
+                setAlertState={setAlertState} 
+            />
+            
             <Loading show={isLoading} />
         </>
     );

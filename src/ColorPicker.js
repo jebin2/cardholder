@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {
     Typography, IconButton, Popover
 } from '@mui/material';
@@ -6,7 +6,7 @@ import './App.css';
 import { HexColorPicker } from "react-colorful";
 import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 
-export default function ColorPicker({ color, setColor }) {
+export default React.memo(function ColorPicker({ color, setColor }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClick = (event) => {
@@ -19,6 +19,10 @@ export default function ColorPicker({ color, setColor }) {
 
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
+
+    const handleChange = useCallback((color) => {
+        setColor({ target: { value: color, name: "color" } });
+      }, [setColor]);
 
     return (
         <div>
@@ -45,10 +49,10 @@ export default function ColorPicker({ color, setColor }) {
                 }}
                 disableRestoreFocus
             >
-                <Typography sx={{ p: 2 }}>
-                    <HexColorPicker color={color} onChange={(color) => setColor({ target: { value: color, name: "color" } })} />
-                </Typography>
+                <div style={{padding: "10px"}}>
+                    <HexColorPicker color={color} onChange={handleChange} />
+                </div>
             </Popover>
         </div>
     );
-}
+});

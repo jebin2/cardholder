@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { processCardData, backgroundColor } from './common';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
@@ -16,8 +16,9 @@ export default function Sync({ from, onSyncComplete, setIsLoading }) {
     const [showError, setShowError] = useState(false);
 
     const handleSyncClick = useCallback(() => setShowConfirmDialog(true), []);
+    const handleCloseDialog = useCallback(() => setShowConfirmDialog(false), [setShowConfirmDialog]);
 
-    const dialogProps = {
+    const dialogProps = useMemo(() => ({
         PaperProps: {
             sx: {
                 width: "340px",
@@ -43,10 +44,10 @@ export default function Sync({ from, onSyncComplete, setIsLoading }) {
             },
         },
         open: showConfirmDialog,
-        onClose: () => setShowConfirmDialog(false),
+        onClose: () => handleCloseDialog(),
         'aria-labelledby': "confirm-dialog-title",
         'aria-describedby': "confirm-dialog-description",
-    };
+    }), [showConfirmDialog, backgroundColor]);
 
     return (
         <>

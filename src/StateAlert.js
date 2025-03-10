@@ -4,9 +4,13 @@ import {
 } from '@mui/material';
 import { backgroundColor } from './common';
 
-export default function StateAlert({ state, type, message, setAlertState }) {
+function StateAlert({ state, type, message, setAlertState }) {
 	return (
-		<Snackbar open={state} autoHideDuration={5000} onClose={() => setAlertState(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+		<Snackbar 
+			open={state} 
+			autoHideDuration={5000} 
+			onClose={() => setAlertState(false)} 
+			anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
 			sx={{
 				'& .MuiPaper-root': {
 					background: `${backgroundColor}`,
@@ -32,3 +36,6 @@ export default function StateAlert({ state, type, message, setAlertState }) {
 		</Snackbar>
 	);
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(StateAlert);

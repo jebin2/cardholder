@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Typography, Box } from '@mui/material';
 import { Error as ErrorIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import { truncateIndexedDB, dialogSx, buttonSx } from './common';
 
-export default function ErrorRedirect({ type, message }) {
+export default React.memo(function ErrorRedirect({ type, message }) {
 	const [open, setOpen] = useState(true);
 
-	const handleClose = async (event, reason) => {
+	const handleClose = useCallback(async (event, reason) => {
 		if (!["escapeKeyDown", "backdropClick"].includes(reason)) {
 			if (type === "reset") {
 				await truncateIndexedDB();
@@ -15,7 +15,7 @@ export default function ErrorRedirect({ type, message }) {
 			}
 			window.location.href = "/cardholder";
 		}
-	};
+	}, [type]);
 
     let localDialogSX = dialogSx();
 
@@ -51,4 +51,4 @@ export default function ErrorRedirect({ type, message }) {
 			</DialogActions>
 		</Dialog>
 	);
-}
+});
